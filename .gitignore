@@ -41,3 +41,5 @@ ayni_risk_model.joblib
 .vscode/
 .idea/
 *.swp
+
+.venv
