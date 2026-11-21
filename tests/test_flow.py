@@ -1,7 +1,8 @@
 """End-to-End Integration Tests for Ayni Cacao Backend."""
 import pytest
 from httpx import AsyncClient, ASGITransport
-from app.main import app
+from app.main import app, seed_initial_data
+from app.infrastructure.database import init_db, engine, Base
 from app.core.config import settings
 
 
@@ -12,7 +13,12 @@ def anyio_backend():
 
 @pytest.mark.anyio
 async def test_01_health_and_root():
-    """Verify application boots and health check returns expected status."""
+    """Verify application boots, initializes DB, and health check returns expected status."""
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    await seed_initial_data()
+
     transport = ASGITransport(app=app)
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         resp = await client.get("/health")

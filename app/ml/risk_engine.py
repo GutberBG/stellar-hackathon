@@ -3,6 +3,7 @@ import os
 from typing import List, Tuple, Dict, Any
 import joblib
 import numpy as np
+import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from app.core.config import settings
 from app.domain.models import RiskLevel
@@ -47,7 +48,7 @@ class RiskEngine:
             n_estimators=100,
             max_depth=8,
             random_state=42,
-            n_jobs=-1,
+            n_jobs=1,
         )
         model.fit(X, y)
 
@@ -73,7 +74,7 @@ class RiskEngine:
         Infers credit risk score (0-100), risk tier, approved advance percentage (15%-60%),
         maximum advance capacity in USDC and BOB, and Spanish explanatory factors.
         """
-        features = np.array(
+        features = pd.DataFrame(
             [[
                 historical_yield_kg,
                 compliance_rate,
@@ -81,7 +82,8 @@ class RiskEngine:
                 rainfall_mm,
                 humidity_pct,
                 expected_harvest_kg,
-            ]]
+            ]],
+            columns=self.FEATURE_NAMES,
         )
 
         raw_pred = float(self.model.predict(features)[0])

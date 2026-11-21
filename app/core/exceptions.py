@@ -56,7 +56,7 @@ class FactoringValidationException(AyniException):
         super().__init__(
             message=message,
             code="FACTORING_VALIDATION_ERROR",
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            status_code=422,
             details=details,
         )
 
