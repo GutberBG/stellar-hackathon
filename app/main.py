@@ -49,6 +49,9 @@ async def seed_initial_data() -> None:
                 phone="+59171234567",
                 compliance_score=0.96,
                 risk_tier="BAJO",
+                hectares=3.2,
+                tree_age_years=12,
+                altitude_m=520.0,
             ),
             ProducerORM(
                 name="Elena Quispe Condori",
@@ -60,6 +63,9 @@ async def seed_initial_data() -> None:
                 phone="+59172345678",
                 compliance_score=0.78,
                 risk_tier="MEDIO",
+                hectares=2.4,
+                tree_age_years=8,
+                altitude_m=480.0,
             ),
             ProducerORM(
                 name="Carlos Condori Mamani",
@@ -71,6 +77,9 @@ async def seed_initial_data() -> None:
                 phone="+59173456789",
                 compliance_score=0.55,
                 risk_tier="ALTO",
+                hectares=1.5,
+                tree_age_years=4,
+                altitude_m=430.0,
             ),
         ]
 

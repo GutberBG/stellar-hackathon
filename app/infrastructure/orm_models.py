@@ -18,6 +18,9 @@ class ProducerORM(Base):
     phone = Column(String(30), nullable=False)
     compliance_score = Column(Float, default=0.90, nullable=False)
     risk_tier = Column(String(20), default="BAJO", nullable=False)
+    hectares = Column(Float, default=2.0, nullable=False)
+    tree_age_years = Column(Integer, default=8, nullable=False)
+    altitude_m = Column(Float, default=500.0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     deliveries = relationship("HarvestDeliveryORM", back_populates="producer", cascade="all, delete-orphan")

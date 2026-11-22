@@ -67,6 +67,17 @@ El oráculo evalúa el riesgo crediticio y proyecta el rendimiento de la cosecha
    * **Alerta de plagas (> 240 mm):** Humedad y lluvia excesiva detonan brotes de **Moniliasis** (*Moniliophthora roreri*) y **Mazorca Negra** (*Phytophthora*).
    * **Humedad relativa (> 85%):** Acelera la proliferación fungosa en el bosque tropical húmedo.
 
+### Modelo de rendimiento y proyección de ingresos (roadmap)
+
+El precio internacional y el rendimiento por hectárea se modelan por separado:
+
+```
+producción_kg      = hectáreas × rendimiento_kg_ha
+ingreso_proyectado = producción_kg × precio_usd_kg × factor_calidad
+```
+
+El dataset de trabajo (precios, clima, rendimiento FAO y panel sintético de parcelas) vive en `../ayni-precios/`. La integración reemplazará el `expected_harvest_kg` auto-reportado y el precio fijo de 4.80 USDC/kg por las salidas de ambos modelos.
+
 ### Tiers de Factoring Aprobado
 * **Riesgo BAJO (Score ≤ 35):** Adelanto pre-aprobado del **50% al 60%** del valor proyectado.
 * **Riesgo MEDIO (Score 36 - 65):** Adelanto pre-aprobado del **30% al 49%**.
@@ -81,7 +92,7 @@ Documentación interactiva Swagger: `http://localhost:8000/docs`
 
 ### 1. Productores
 * `GET /api/v1/producers`: Retorna la lista de socios cacaoteros.
-* `GET /api/v1/producers/{id}`: Perfil completo, coordenadas EUDR (Trazabilidad y Cero Deforestación), historial de entregas y préstamos activos.
+* `GET /api/v1/producers/{id}`: Perfil completo, coordenadas EUDR (Trazabilidad y Cero Deforestación), superficie (`hectares`), edad de plantas (`tree_age_years`), altitud (`altitude_m`), historial de entregas y préstamos activos.
 
 ### 2. Módulo 1 · Acopio y Boleta Transparente
 * `POST /api/v1/deliveries`:
@@ -133,9 +144,9 @@ Documentación interactiva Swagger: `http://localhost:8000/docs`
 ## 👥 Seed Data Automático
 
 Al iniciar la aplicación con una base de datos vacía, se auto-generan:
-1. **Mateo Mamani Ticona:** Central El Ceibo (Sapecho), Parcela `BO-LPZ-AB-ELCEIBO-001`, Riesgo BAJO, cumplimiento 96%.
-2. **Elena Quispe Condori:** Cooperativa Agroecológica Palos Blancos, Parcela `BO-LPZ-PB-AGROECO-002`, Riesgo MEDIO, cumplimiento 78%.
-3. **Carlos Condori Mamani:** Bella Vista, Parcela `BO-LPZ-BV-ASOPROC-003`, Riesgo ALTO (nuevo productor), cumplimiento 55%.
+1. **Mateo Mamani Ticona:** Central El Ceibo (Sapecho), Parcela `BO-LPZ-AB-ELCEIBO-001`, 3.2 ha, plantas de 12 años, 520 msnm, Riesgo BAJO, cumplimiento 96%.
+2. **Elena Quispe Condori:** Cooperativa Agroecológica Palos Blancos, Parcela `BO-LPZ-PB-AGROECO-002`, 2.4 ha, plantas de 8 años, 480 msnm, Riesgo MEDIO, cumplimiento 78%.
+3. **Carlos Condori Mamani:** Bella Vista, Parcela `BO-LPZ-BV-ASOPROC-003`, 1.5 ha, plantas de 4 años, 430 msnm, Riesgo ALTO (nuevo productor), cumplimiento 55%.
 4. **5 Boletas Históricas:** Con ejemplos de cacao baba, cacao seco con penalización y grados A/B.
 5. **Vaquita Pool:** Fondos iniciales de **$25,000.00 USDC**.
 

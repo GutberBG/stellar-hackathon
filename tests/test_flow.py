@@ -56,6 +56,9 @@ async def test_02_producers_seed_data():
         assert "El Ceibo" in mateo["cooperative"]
         assert mateo["eudr_latitude"] == -15.5412
         assert mateo["eudr_longitude"] == -67.3298
+        assert mateo["hectares"] == 3.2
+        assert mateo["tree_age_years"] == 12
+        assert mateo["altitude_m"] == 520.0
         assert len(mateo["deliveries"]) >= 2
         assert mateo["total_delivered_kg"] > 0
 
