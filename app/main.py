@@ -1,9 +1,11 @@
 """FastAPI Main Application Entrypoint for Ayni Cacao Backend."""
+import os
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import AyniException, ayni_exception_handler
@@ -287,6 +289,11 @@ app.add_exception_handler(AyniException, ayni_exception_handler)
 
 # Include API Router (/api/v1)
 app.include_router(api_router)
+
+# Mount static files for KAIRO UI assets (including kairo-mascot-transparent.png)
+_static_dir = os.path.join(os.path.dirname(__file__), "static")
+if os.path.exists(_static_dir):
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
 
 @app.get("/", tags=["Health"])

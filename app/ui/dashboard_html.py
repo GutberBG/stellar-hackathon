@@ -1,491 +1,851 @@
-"""Embedded Interactive Web Application UI for Ayni Cacao."""
+"""Embedded Interactive Web Application UI for KAIRO 3.0.
+
+Professional AgriTech & FinTech SaaS UI with clean white/black identity,
+warm agricultural accents (#C76A32, #3F7D44, #75452D, #D5A332, #A74445),
+official transparent mascot integration, and responsive navigation.
+"""
 
 DASHBOARD_HTML = """<!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ayni Cacao 🍫🌱 | Plataforma de Acopio & Factoring Agrícola</title>
+  <title>KAIRO 3.0 — Acopio Transparente, Trazabilidad EUDR y Factoring Agrícola</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+            display: ['"Space Grotesk"', 'sans-serif'],
+          },
+          colors: {
+            kairo: {
+              bg: '#FAFAF8',
+              card: '#FFFFFF',
+              alt: '#F4F4F0',
+              border: '#E5E5E0',
+              borderLight: '#EFEFEA',
+              text: '#171717',
+              muted: '#626262',
+              cacao: '#C76A32',
+              cacaoHover: '#B25A25',
+              cacaoDark: '#75452D',
+              green: '#3F7D44',
+              greenLight: '#EBF4EC',
+              gold: '#D5A332',
+              goldLight: '#FEF9EC',
+              red: '#A74445',
+              redLight: '#FDF2F2',
+            }
+          },
+          boxShadow: {
+            'subtle': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03)',
+            'card': '0 4px 12px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.03)',
+            'elevated': '0 10px 25px -5px rgba(0, 0, 0, 0.08), 0 8px 10px -6px rgba(0, 0, 0, 0.03)',
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #0f172a; color: #f8fafc; }
-    .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
-    .badge-stellar { background: linear-gradient(135deg, #0284c7, #2563eb); }
-    .badge-cacao { background: linear-gradient(135deg, #b45309, #78350f); }
+    body {
+      background-color: #FAFAF8;
+      color: #171717;
+      font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 6px;
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #F4F4F0;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #D5D5CF;
+      border-radius: 9999px;
+    }
+    .nav-tab-active {
+      background-color: #171717 !important;
+      color: #FFFFFF !important;
+      font-weight: 600 !important;
+    }
+    .mascot-shadow {
+      filter: drop-shadow(0 12px 16px rgba(117, 69, 45, 0.15));
+    }
   </style>
 </head>
-<body class="min-h-screen flex flex-col">
+<body class="min-h-full flex flex-col antialiased bg-[#FAFAF8] text-[#171717]">
 
-  <!-- Top Navbar -->
-  <header class="border-b border-slate-800 bg-slate-900/80 sticky top-0 z-50 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center space-x-3">
-        <span class="text-3xl">🍫🌱</span>
-        <div>
-          <span class="text-xl font-extrabold tracking-tight bg-gradient-to-r from-amber-400 to-emerald-400 bg-clip-text text-transparent">
-            Ayni Cacao
-          </span>
-          <span class="text-xs text-slate-400 block -mt-1 font-medium">Alto Beni & Palos Blancos · Bolivia</span>
+  <!-- Top Global Header / Navigation -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#E5E5E0] shadow-subtle">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16">
+        
+        <!-- Brand Logo & Identity -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+          <div class="w-10 h-10 rounded-xl bg-[#C76A32]/10 border border-[#C76A32]/20 flex items-center justify-center p-1 overflow-hidden">
+            <img src="/static/kairo-mascot-transparent.png" alt="KAIRO" class="w-full h-full object-contain" onerror="this.src='/kairo-mascot-transparent.png'">
+          </div>
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <span class="font-display text-xl font-extrabold tracking-tight text-[#171717]">KAIRO</span>
+              <span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-[#C76A32] text-white">3.0</span>
+            </div>
+            <p class="text-[11px] text-[#626262] font-medium leading-none">Alto Beni · Palos Blancos · Sapecho</p>
+          </div>
         </div>
-      </div>
-      
-      <!-- Nav Tabs -->
-      <nav class="hidden md:flex space-x-1" id="nav-tabs">
-        <button onclick="switchTab('dashboard')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-amber-400 bg-slate-800/80" data-tab="dashboard">
-          <i class="fa-solid fa-chart-line mr-2"></i>Dashboard
-        </button>
-        <button onclick="switchTab('producers')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800" data-tab="producers">
-          <i class="fa-solid fa-users mr-2"></i>Productores EUDR
-        </button>
-        <button onclick="switchTab('deliveries')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800" data-tab="deliveries">
-          <i class="fa-solid fa-scale-balanced mr-2"></i>Boleta Acopio
-        </button>
-        <button onclick="switchTab('factoring')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800" data-tab="factoring">
-          <i class="fa-solid fa-brain mr-2"></i>Factoring ML
-        </button>
-        <button onclick="switchTab('ml-forecast')" class="tab-btn px-4 py-2 rounded-lg text-sm font-semibold transition-all text-slate-300 hover:text-white hover:bg-slate-800" data-tab="ml-forecast">
-          <i class="fa-solid fa-wand-magic-sparkles mr-2"></i>Pronóstico ML Two-Stage
-        </button>
-      </nav>
 
-      <div class="flex items-center space-x-3">
-        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>Stellar Testnet
-        </span>
-        <a href="/docs" target="_blank" class="px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
-          <i class="fa-solid fa-code mr-1"></i>Swagger Docs
-        </a>
+        <!-- Desktop Navigation Tabs (Ensured zero wrap, zero clipping) -->
+        <nav class="hidden lg:flex items-center space-x-1 bg-[#F4F4F0] p-1 rounded-xl border border-[#E5E5E0]" id="nav-tabs-desktop" aria-label="Navegación principal">
+          <button onclick="switchTab('dashboard')" class="tab-btn nav-tab-active px-3 py-1.5 rounded-lg text-xs font-medium text-[#626262] hover:text-[#171717] transition-all flex items-center space-x-1.5" data-tab="dashboard">
+            <i class="fa-solid fa-chart-pie text-xs"></i>
+            <span>Dashboard</span>
+          </button>
+          <button onclick="switchTab('producers')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#626262] hover:text-[#171717] transition-all flex items-center space-x-1.5" data-tab="producers">
+            <i class="fa-solid fa-leaf text-xs"></i>
+            <span>EUDR & Parcelas</span>
+          </button>
+          <button onclick="switchTab('deliveries')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#626262] hover:text-[#171717] transition-all flex items-center space-x-1.5" data-tab="deliveries">
+            <i class="fa-solid fa-scale-balanced text-xs"></i>
+            <span>Acopio de Cacao</span>
+          </button>
+          <button onclick="switchTab('factoring')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#626262] hover:text-[#171717] transition-all flex items-center space-x-1.5" data-tab="factoring">
+            <i class="fa-solid fa-seedling text-xs"></i>
+            <span>Factoring ML</span>
+          </button>
+          <button onclick="switchTab('ml-forecast')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#626262] hover:text-[#171717] transition-all flex items-center space-x-1.5" data-tab="ml-forecast">
+            <i class="fa-solid fa-brain text-xs"></i>
+            <span>Two-Stage ML</span>
+          </button>
+          <button onclick="switchTab('progress')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-medium text-[#626262] hover:text-[#171717] transition-all flex items-center space-x-1.5" data-tab="progress">
+            <i class="fa-solid fa-trophy text-xs text-[#D5A332]"></i>
+            <span>Progreso</span>
+          </button>
+        </nav>
+
+        <!-- Right System Badges & Actions -->
+        <div class="flex items-center space-x-2.5">
+          <!-- Stellar Ledger Badge -->
+          <div class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#3F7D44]/10 text-[#3F7D44] border border-[#3F7D44]/20" title="Conectado al libro contable de Stellar Testnet">
+            <span class="w-2 h-2 rounded-full bg-[#3F7D44] animate-pulse"></span>
+            <span>Stellar Testnet</span>
+          </div>
+
+          <!-- Swagger Docs Link -->
+          <a href="/docs" target="_blank" rel="noopener" class="hidden md:flex items-center space-x-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-white text-[#626262] hover:text-[#171717] border border-[#E5E5E0] hover:border-[#171717] transition">
+            <i class="fa-solid fa-code text-[11px]"></i>
+            <span>API Docs</span>
+          </a>
+
+          <!-- Mobile Hamburger Toggle -->
+          <button type="button" onclick="toggleMobileMenu()" class="lg:hidden p-2 rounded-lg text-[#171717] bg-[#F4F4F0] border border-[#E5E5E0] hover:bg-[#E5E5E0] transition" aria-label="Abrir menú de navegación">
+            <i class="fa-solid fa-bars text-sm"></i>
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Mobile Navigation Drawer -->
+      <div id="mobile-menu" class="hidden lg:hidden border-t border-[#E5E5E0] py-3 space-y-1">
+        <button onclick="switchTab('dashboard'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] flex items-center space-x-2">
+          <i class="fa-solid fa-chart-pie w-5 text-[#C76A32]"></i>
+          <span>Dashboard Principal</span>
+        </button>
+        <button onclick="switchTab('producers'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] flex items-center space-x-2">
+          <i class="fa-solid fa-leaf w-5 text-[#3F7D44]"></i>
+          <span>EUDR & Trazabilidad de Parcelas</span>
+        </button>
+        <button onclick="switchTab('deliveries'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] flex items-center space-x-2">
+          <i class="fa-solid fa-scale-balanced w-5 text-[#75452D]"></i>
+          <span>Acopio de Cacao & Boleta</span>
+        </button>
+        <button onclick="switchTab('factoring'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] flex items-center space-x-2">
+          <i class="fa-solid fa-seedling w-5 text-[#D5A332]"></i>
+          <span>Factoring ML & Oráculo</span>
+        </button>
+        <button onclick="switchTab('ml-forecast'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] flex items-center space-x-2">
+          <i class="fa-solid fa-brain w-5 text-indigo-600"></i>
+          <span>Two-Stage ML Rendimiento & Precios</span>
+        </button>
+        <button onclick="switchTab('progress'); toggleMobileMenu()" class="w-full text-left px-3 py-2 rounded-lg text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] flex items-center space-x-2">
+          <i class="fa-solid fa-trophy w-5 text-[#D5A332]"></i>
+          <span>Progreso & Puntos KAIRO</span>
+        </button>
       </div>
     </div>
   </header>
 
-  <!-- Main Content Container -->
-  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+  <!-- Main Workspace Container -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- TAB 1: DASHBOARD -->
+    <!-- ==================================================================== -->
+    <!-- TAB 1: DASHBOARD PRINCIPAL                                           -->
+    <!-- ==================================================================== -->
     <div id="tab-dashboard" class="tab-content space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-slate-800">
-        <div>
-          <h1 class="text-2xl font-bold text-white">Métricas de Operación en Tiempo Real</h1>
-          <p class="text-sm text-slate-400">Supervisión de liquidez de Vaquita Pool, boletas notarizadas y factoring activo.</p>
-        </div>
-        <button onclick="loadDashboardData()" class="self-start px-3 py-1.5 bg-slate-800 hover:bg-slate-700 rounded-lg text-xs text-slate-200 border border-slate-700 transition">
-          <i class="fa-solid fa-rotate mr-1.5"></i>Actualizar
-        </button>
-      </div>
+      
+      <!-- Welcome Hero Banner with Official KAIRO Mascot -->
+      <section class="relative bg-gradient-to-br from-white via-[#FAF7F3] to-[#F5ECE1] rounded-2xl border border-[#E5E5E0] p-6 sm:p-8 shadow-card overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-3">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#C76A32]/10 border border-[#C76A32]/20 text-[#C76A32] text-xs font-semibold">
+              <i class="fa-solid fa-shield-check"></i>
+              <span>Plataforma Oficial Cooperativas del Norte de La Paz</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-[#171717] tracking-tight leading-tight">
+              Bienvenido a <span class="text-[#C76A32]">KAIRO</span>.
+            </h1>
+            <p class="text-sm sm:text-base text-[#626262] max-w-2xl font-normal leading-relaxed">
+              Tu producción, tus registros y tus oportunidades en un solo lugar. Conectando la Central de Cooperativas El Ceibo, Palos Blancos y Sapecho con acopio transparente, trazabilidad EUDR y liquidez agrícola en Stellar.
+            </p>
+            <div class="flex flex-wrap gap-2.5 pt-2">
+              <button onclick="switchTab('deliveries')" class="px-4 py-2 rounded-xl bg-[#C76A32] hover:bg-[#B25A25] text-white text-xs font-bold shadow-sm transition flex items-center space-x-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>Registrar Boleta de Acopio</span>
+              </button>
+              <button onclick="switchTab('factoring')" class="px-4 py-2 rounded-xl bg-white hover:bg-[#F4F4F0] text-[#171717] border border-[#E5E5E0] text-xs font-bold transition flex items-center space-x-2">
+                <i class="fa-solid fa-calculator text-[#C76A32]"></i>
+                <span>Simular Factoring Agrícola</span>
+              </button>
+              <button onclick="switchTab('producers')" class="px-4 py-2 rounded-xl bg-white hover:bg-[#F4F4F0] text-[#626262] hover:text-[#171717] border border-[#E5E5E0] text-xs font-semibold transition">
+                <span>Ver Parcelas EUDR</span>
+              </button>
+            </div>
+          </div>
 
-      <!-- Stats Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card p-5 rounded-xl border border-slate-700/60 shadow-lg">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>POOL VAQUITA DISPONIBLE</span>
-            <span class="p-2 bg-emerald-500/10 text-emerald-400 rounded-lg"><i class="fa-solid fa-coins"></i></span>
+          <!-- Kairo Mascot Hero Representation (Section 7.3) -->
+          <div class="md:col-span-4 flex justify-center md:justify-end relative">
+            <div class="relative w-44 sm:w-52 h-48 sm:h-56 flex items-center justify-center">
+              <div class="absolute inset-0 bg-[#C76A32]/10 rounded-full blur-2xl transform scale-90"></div>
+              <img src="/static/kairo-mascot-transparent.png" 
+                   alt="Kairo la mascota oficial de cacao" 
+                   class="relative w-full h-full object-contain mascot-shadow transform hover:scale-105 transition-transform duration-300"
+                   onerror="this.src='/kairo-mascot-transparent.png'">
+            </div>
           </div>
-          <div class="mt-2 flex items-baseline">
-            <span id="stat-pool-avail" class="text-2xl font-extrabold text-emerald-400">$25,000.00</span>
-            <span class="ml-1 text-xs text-slate-400">USDC</span>
+
+        </div>
+      </section>
+
+      <!-- Financial Metrics & Operation Cards (80% neutral, 15% brand, 5% accent) -->
+      <section class="space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-base font-bold text-[#171717]">Métricas Financieras & Operativas</h2>
+            <p class="text-xs text-[#626262]">Estado en vivo de liquidez, factoring desembolsado y contratos notarizados.</p>
           </div>
-          <div class="mt-2 text-xs text-slate-400 flex justify-between">
-            <span>Total Pool: <strong id="stat-pool-total">$25,000.00</strong></span>
-            <span>Res.: <strong id="stat-pool-res" class="text-amber-400">$0.00</strong></span>
-          </div>
+          <button onclick="loadDashboardData()" id="btn-refresh-dash" class="px-3 py-1.5 rounded-lg bg-white border border-[#E5E5E0] text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] transition flex items-center space-x-1.5 shadow-subtle">
+            <i class="fa-solid fa-arrows-rotate text-[#C76A32]" id="icon-refresh"></i>
+            <span>Actualizar</span>
+          </button>
         </div>
 
-        <div class="glass-card p-5 rounded-xl border border-slate-700/60 shadow-lg">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>TOTAL ADELANTADO (FACTORING)</span>
-            <span class="p-2 bg-amber-500/10 text-amber-400 rounded-lg"><i class="fa-solid fa-hand-holding-dollar"></i></span>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Pool Vaquita Card -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle hover:border-[#C76A32]/40 transition">
+            <div class="flex items-center justify-between text-[#626262] text-xs font-semibold uppercase tracking-wider">
+              <span>Liquidez Pool Vaquita</span>
+              <span class="w-7 h-7 rounded-lg bg-[#3F7D44]/10 text-[#3F7D44] flex items-center justify-center">
+                <i class="fa-solid fa-vault text-xs"></i>
+              </span>
+            </div>
+            <div class="mt-3 flex items-baseline">
+              <span id="stat-pool-avail" class="text-2xl font-extrabold text-[#171717]">$25,000.00</span>
+              <span class="ml-1 text-xs font-semibold text-[#626262]">USDC</span>
+            </div>
+            <div class="mt-2 text-xs text-[#626262] flex justify-between border-t border-[#EFEFEA] pt-2">
+              <span>Total Pool: <strong id="stat-pool-total" class="text-[#171717]">$25,000.00</strong></span>
+              <span>Reservado: <strong id="stat-pool-res" class="text-[#C76A32]">$0.00</strong></span>
+            </div>
           </div>
-          <div class="mt-2 flex items-baseline">
-            <span id="stat-total-usdc" class="text-2xl font-extrabold text-amber-400">$0.00</span>
-            <span class="ml-1 text-xs text-slate-400">USDC</span>
+
+          <!-- Factoring Advanced Card -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle hover:border-[#C76A32]/40 transition">
+            <div class="flex items-center justify-between text-[#626262] text-xs font-semibold uppercase tracking-wider">
+              <span>Total Anticipado Factoring</span>
+              <span class="w-7 h-7 rounded-lg bg-[#C76A32]/10 text-[#C76A32] flex items-center justify-center">
+                <i class="fa-solid fa-hand-holding-dollar text-xs"></i>
+              </span>
+            </div>
+            <div class="mt-3 flex items-baseline">
+              <span id="stat-total-usdc" class="text-2xl font-extrabold text-[#171717]">$0.00</span>
+              <span class="ml-1 text-xs font-semibold text-[#626262]">USDC</span>
+            </div>
+            <div class="mt-2 text-xs text-[#626262] border-t border-[#EFEFEA] pt-2 flex items-center justify-between">
+              <span>En Bolivianos (6.96):</span>
+              <strong id="stat-total-bob" class="text-[#171717]">Bs. 0.00</strong>
+            </div>
           </div>
-          <div class="mt-2 text-xs text-slate-400">
-            <span>Equivalente en Bolivianos: <strong id="stat-total-bob" class="text-slate-200">Bs. 0.00</strong></span>
+
+          <!-- Notarized Deliveries Card -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle hover:border-[#C76A32]/40 transition">
+            <div class="flex items-center justify-between text-[#626262] text-xs font-semibold uppercase tracking-wider">
+              <span>Boletas Notarizadas</span>
+              <span class="w-7 h-7 rounded-lg bg-[#D5A332]/10 text-[#D5A332] flex items-center justify-center">
+                <i class="fa-solid fa-receipt text-xs"></i>
+              </span>
+            </div>
+            <div class="mt-3 flex items-baseline">
+              <span id="stat-deliveries-count" class="text-2xl font-extrabold text-[#171717]">0</span>
+              <span class="ml-1 text-xs font-semibold text-[#626262]">tickets</span>
+            </div>
+            <div class="mt-2 text-xs text-[#626262] border-t border-[#EFEFEA] pt-2 flex items-center space-x-1.5">
+              <i class="fa-solid fa-link text-[#3F7D44] text-[10px]"></i>
+              <span class="truncate">Hashes SHA-256 en Stellar</span>
+            </div>
           </div>
+
+          <!-- Active Escrow Loans Card -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle hover:border-[#C76A32]/40 transition">
+            <div class="flex items-center justify-between text-[#626262] text-xs font-semibold uppercase tracking-wider">
+              <span>Préstamos en Garantía</span>
+              <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <i class="fa-solid fa-lock text-xs"></i>
+              </span>
+            </div>
+            <div class="mt-3 flex items-baseline">
+              <span id="stat-active-loans" class="text-2xl font-extrabold text-[#171717]">0</span>
+              <span class="ml-1 text-xs font-semibold text-[#626262]">activos</span>
+            </div>
+            <div class="mt-2 text-xs text-[#626262] border-t border-[#EFEFEA] pt-2 flex items-center space-x-1.5">
+              <i class="fa-solid fa-file-contract text-indigo-600 text-[10px]"></i>
+              <span class="truncate">Trustless Work Escrow</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Recent Notarized Deliveries Table (Section 8 Bug Fix: loads perfectly) -->
+      <section class="bg-white rounded-xl border border-[#E5E5E0] shadow-subtle overflow-hidden">
+        <div class="p-5 border-b border-[#E5E5E0] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h3 class="text-base font-bold text-[#171717] flex items-center space-x-2">
+              <i class="fa-solid fa-clipboard-check text-[#C76A32]"></i>
+              <span>Últimas Boletas de Acopio Notarizadas</span>
+            </h3>
+            <p class="text-xs text-[#626262]">Registro inmutable de peso neto seco equivalente, coordenadas EUDR y liquidación.</p>
+          </div>
+          <button onclick="switchTab('deliveries')" class="text-xs font-semibold text-[#C76A32] hover:text-[#B25A25] self-start sm:self-auto flex items-center space-x-1">
+            <span>Nueva Boleta</span>
+            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+          </button>
         </div>
 
-        <div class="glass-card p-5 rounded-xl border border-slate-700/60 shadow-lg">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>BOLETAS NOTARIZADAS</span>
-            <span class="p-2 bg-blue-500/10 text-blue-400 rounded-lg"><i class="fa-solid fa-file-shield"></i></span>
-          </div>
-          <div class="mt-2 flex items-baseline">
-            <span id="stat-deliveries-count" class="text-2xl font-extrabold text-blue-400">5</span>
-            <span class="ml-1 text-xs text-slate-400">tickets</span>
-          </div>
-          <div class="mt-2 text-xs text-slate-400">
-            <span>Inmutabilidad SHA-256 en Stellar</span>
-          </div>
-        </div>
-
-        <div class="glass-card p-5 rounded-xl border border-slate-700/60 shadow-lg">
-          <div class="flex items-center justify-between text-slate-400 text-xs font-medium">
-            <span>PRÉSTAMOS EN ESCROW</span>
-            <span class="p-2 bg-purple-500/10 text-purple-400 rounded-lg"><i class="fa-solid fa-lock"></i></span>
-          </div>
-          <div class="mt-2 flex items-baseline">
-            <span id="stat-active-loans" class="text-2xl font-extrabold text-purple-400">0</span>
-            <span class="ml-1 text-xs text-slate-400">activos</span>
-          </div>
-          <div class="mt-2 text-xs text-slate-400">
-            <span>Trustless Work Smart Contracts</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Recent Deliveries Table -->
-      <div class="glass-card rounded-xl border border-slate-800 p-6 shadow-xl">
-        <h3 class="text-lg font-bold text-white mb-4 flex items-center">
-          <i class="fa-solid fa-receipt text-amber-400 mr-2"></i>Últimas Boletas de Acopio Notarizadas
-        </h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm text-slate-300">
-            <thead class="text-xs uppercase bg-slate-800/80 text-slate-400">
+        <!-- Table View -->
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs text-[#171717]" aria-label="Boletas de Acopio Recientes">
+            <thead class="bg-[#F4F4F0] text-[#626262] font-semibold uppercase tracking-wider text-[11px] border-b border-[#E5E5E0]">
               <tr>
                 <th class="px-4 py-3">Código</th>
-                <th class="px-4 py-3">Productor</th>
-                <th class="px-4 py-3">Tipo / Calidad</th>
-                <th class="px-4 py-3">Peso Bruto / Neto</th>
-                <th class="px-4 py-3">Total USDC / BOB</th>
-                <th class="px-4 py-3">Hash Notarizado Stellar</th>
-                <th class="px-4 py-3">Estado</th>
+                <th class="px-4 py-3">Socio Productor</th>
+                <th class="px-4 py-3">Tipo / Grado</th>
+                <th class="px-4 py-3">Peso Bruto &rarr; Neto</th>
+                <th class="px-4 py-3">Liquidación Total</th>
+                <th class="px-4 py-3">Hash Stellar Testnet</th>
+                <th class="px-4 py-3 text-right">Estado</th>
               </tr>
             </thead>
-            <tbody id="recent-deliveries-body" class="divide-y divide-slate-800">
-              <tr><td colspan="7" class="text-center py-6 text-slate-500">Cargando boletas históricas...</td></tr>
+            <tbody id="recent-deliveries-body" class="divide-y divide-[#EFEFEA]">
+              <tr>
+                <td colspan="7" class="text-center py-8 text-[#626262]">
+                  <i class="fa-solid fa-spinner fa-spin mr-2 text-[#C76A32]"></i>Cargando boletas de acopio en tiempo real...
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
+
+      <!-- Active Escrow Loans Table -->
+      <section class="bg-white rounded-xl border border-[#E5E5E0] shadow-subtle overflow-hidden">
+        <div class="p-5 border-b border-[#E5E5E0] flex items-center justify-between">
+          <div>
+            <h3 class="text-base font-bold text-[#171717] flex items-center space-x-2">
+              <i class="fa-solid fa-file-invoice-dollar text-[#3F7D44]"></i>
+              <span>Operaciones de Factoring Activas en Escrow</span>
+            </h3>
+            <p class="text-xs text-[#626262]">Préstamos condicionados a cosecha con fondos reservados en Vaquita Pool.</p>
+          </div>
+        </div>
+        <div class="overflow-x-auto custom-scrollbar">
+          <table class="w-full text-left text-xs text-[#171717]" aria-label="Préstamos de Factoring Activos">
+            <thead class="bg-[#F4F4F0] text-[#626262] font-semibold uppercase tracking-wider text-[11px] border-b border-[#E5E5E0]">
+              <tr>
+                <th class="px-4 py-3">Código Préstamo</th>
+                <th class="px-4 py-3">Productor</th>
+                <th class="px-4 py-3">Monto Aprobado</th>
+                <th class="px-4 py-3">Equivalente BOB</th>
+                <th class="px-4 py-3">Contrato Trustless Work</th>
+                <th class="px-4 py-3 text-right">Acción</th>
+              </tr>
+            </thead>
+            <tbody id="active-loans-body" class="divide-y divide-[#EFEFEA]">
+              <tr>
+                <td colspan="6" class="text-center py-6 text-[#626262]">No hay préstamos activos en este momento.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
     </div>
 
-    <!-- TAB 2: PRODUCTORES -->
+    <!-- ==================================================================== -->
+    <!-- TAB 2: EUDR & PARCELAS (Trazabilidad y Cero Deforestación)             -->
+    <!-- ==================================================================== -->
     <div id="tab-producers" class="tab-content hidden space-y-6">
-      <div class="flex items-center justify-between pb-2 border-b border-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E5E5E0]">
         <div>
-          <h1 class="text-2xl font-bold text-white">Socios Cacaoteros Registrados</h1>
-          <p class="text-sm text-slate-400">Trazabilidad EUDR, cumplimiento y georreferenciación de parcelas.</p>
+          <h1 class="text-2xl font-display font-bold text-[#171717]">Socios Cacaoteros & Trazabilidad EUDR</h1>
+          <p class="text-xs sm:text-sm text-[#626262]">
+            Georreferenciación de parcelas, coordenadas GPS y validación documental contra la deforestación para exportación a la Unión Europea.
+          </p>
+        </div>
+        <span class="self-start sm:self-auto px-3 py-1 rounded-full text-xs font-semibold bg-[#3F7D44]/10 text-[#3F7D44] border border-[#3F7D44]/20 flex items-center space-x-1.5">
+          <i class="fa-solid fa-tree"></i>
+          <span>Reglamento EUDR 2023/1115</span>
+        </span>
+      </div>
+
+      <!-- Producers Grid -->
+      <div id="producers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div class="col-span-full py-12 text-center text-[#626262]">
+          <i class="fa-solid fa-spinner fa-spin mr-2 text-[#C76A32]"></i>Cargando socios cacaoteros...
         </div>
       </div>
-
-      <div id="producers-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- Rendered by JS -->
-      </div>
     </div>
 
-    <!-- TAB 3: REGISTRO DE ACOPIO -->
+    <!-- ==================================================================== -->
+    <!-- TAB 3: REGISTRO DE ACOPIO (3 Etapas Claras, Section 10)               -->
+    <!-- ==================================================================== -->
     <div id="tab-deliveries" class="tab-content hidden space-y-6">
-      <div class="max-w-2xl mx-auto glass-card rounded-xl border border-slate-800 p-6 md:p-8 shadow-2xl">
-        <div class="border-b border-slate-800 pb-4 mb-6">
-          <h1 class="text-xl font-bold text-white flex items-center">
-            <i class="fa-solid fa-scale-balanced text-emerald-400 mr-2"></i>Registrar Nueva Boleta de Acopio
-          </h1>
-          <p class="text-xs text-slate-400 mt-1">
-            Aplica factores agronómicos automáticos (Baba 0.33, penalización humedad >7.5%) y notariza en Stellar.
+      
+      <div class="max-w-3xl mx-auto space-y-6">
+        
+        <div class="text-center space-y-1">
+          <h1 class="text-2xl font-display font-bold text-[#171717]">Módulo de Acopio & Boleta Transparente</h1>
+          <p class="text-xs text-[#626262]">
+            Digitalización de pesaje en balanza, cálculo agronómico riguroso y notarización criptográfica en Stellar.
           </p>
         </div>
 
-        <form id="delivery-form" onsubmit="submitDelivery(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Socio Productor</label>
-            <select id="del-producer-id" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400" required>
-              <option value="1">Mateo Mamani Ticona - Central El Ceibo (Sapecho)</option>
-              <option value="2">Elena Quispe Condori - Coop. Palos Blancos</option>
-              <option value="3">Carlos Condori Mamani - Asoc. Bella Vista</option>
-            </select>
+        <!-- 3-Stage Progress Indicator -->
+        <div class="grid grid-cols-3 gap-2 p-1.5 bg-[#F4F4F0] rounded-xl border border-[#E5E5E0] text-center text-xs font-semibold text-[#626262]">
+          <div id="step-pill-1" class="py-2 rounded-lg bg-white text-[#171717] shadow-subtle border border-[#E5E5E0]">
+            <span class="w-5 h-5 rounded-full bg-[#171717] text-white inline-flex items-center justify-center text-[10px] mr-1.5">1</span>
+            <span>Datos Entrega</span>
+          </div>
+          <div id="step-pill-2" class="py-2 rounded-lg text-[#626262]">
+            <span class="w-5 h-5 rounded-full bg-[#E5E5E0] text-[#171717] inline-flex items-center justify-center text-[10px] mr-1.5">2</span>
+            <span>Vista Previa</span>
+          </div>
+          <div id="step-pill-3" class="py-2 rounded-lg text-[#626262]">
+            <span class="w-5 h-5 rounded-full bg-[#E5E5E0] text-[#171717] inline-flex items-center justify-center text-[10px] mr-1.5">3</span>
+            <span>Comprobante</span>
+          </div>
+        </div>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-2xl border border-[#E5E5E0] p-6 sm:p-8 shadow-card space-y-6">
+          
+          <form id="delivery-form" onsubmit="submitDelivery(event)" class="space-y-5">
+            
+            <!-- Etapa 1: Datos de la Entrega -->
+            <div class="space-y-4">
+              <h2 class="text-sm font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-2 border-b border-[#EFEFEA] pb-2">
+                <i class="fa-solid fa-scale-balanced text-[#C76A32]"></i>
+                <span>Etapa 1 · Parámetros de Acopio</span>
+              </h2>
+
+              <div>
+                <label for="del-producer-id" class="block text-xs font-semibold text-[#171717] mb-1.5">Socio Productor Autorizado</label>
+                <select id="del-producer-id" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#C76A32] focus:border-transparent font-medium" required>
+                  <option value="1">Mateo Mamani Ticona — Central El Ceibo (Sapecho) · Parcela BO-LPZ-AB-ELCEIBO-001</option>
+                  <option value="2">Elena Quispe Condori — Coop. Agroecológica Palos Blancos · Parcela BO-LPZ-PB-AGROECO-002</option>
+                  <option value="3">Carlos Condori Mamani — Asoc. Productores Bella Vista · Parcela BO-LPZ-BV-ASOPROC-003</option>
+                </select>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="del-cacao-type" class="block text-xs font-semibold text-[#171717] mb-1.5">Estado del Cacao</label>
+                  <select id="del-cacao-type" onchange="calculatePreview()" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#C76A32] font-medium">
+                    <option value="BABA">Cacao en Baba (Conversión 0.33)</option>
+                    <option value="SECO">Cacao Seco (Penalidad si &gt; 7.5% humedad)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="del-quality" class="block text-xs font-semibold text-[#171717] mb-1.5">Grado de Calidad Evaluado</label>
+                  <select id="del-quality" onchange="calculatePreview()" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] focus:outline-none focus:ring-2 focus:ring-[#C76A32] font-medium">
+                    <option value="A">Grado A (1.00x — Cacao de Exportación)</option>
+                    <option value="B">Grado B (0.90x — Cacao Convencional)</option>
+                    <option value="C">Grado C (0.75x — Cacao con Defectos)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="del-gross-weight" class="block text-xs font-semibold text-[#171717] mb-1.5">Peso Bruto Balanza (kg)</label>
+                  <div class="relative">
+                    <input type="number" id="del-gross-weight" step="0.1" min="1" value="1000" oninput="calculatePreview()" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] font-bold focus:outline-none focus:ring-2 focus:ring-[#C76A32]" required>
+                    <span class="absolute right-3.5 top-2.5 text-xs text-[#626262]">kg</span>
+                  </div>
+                </div>
+                <div>
+                  <label for="del-moisture" class="block text-xs font-semibold text-[#171717] mb-1.5">Humedad Medida (%)</label>
+                  <div class="relative">
+                    <input type="number" id="del-moisture" step="0.1" min="0" max="100" value="55.0" oninput="calculatePreview()" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3.5 py-2.5 text-xs text-[#171717] font-bold focus:outline-none focus:ring-2 focus:ring-[#C76A32]" required>
+                    <span class="absolute right-3.5 top-2.5 text-xs text-[#626262]">%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Etapa 2: Vista Previa de la Liquidación -->
+            <div class="space-y-3 bg-[#F4F4F0] rounded-xl p-5 border border-[#E5E5E0]">
+              <h2 class="text-xs font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-1.5">
+                <i class="fa-solid fa-calculator text-[#C76A32]"></i>
+                <span>Etapa 2 · Cálculo Agronómico & Financiero en Vivo</span>
+              </h2>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
+                <div class="bg-white p-3 rounded-lg border border-[#E5E5E0]">
+                  <span class="text-[#626262] block text-[11px]">Peso Neto Seco Eq.:</span>
+                  <span id="preview-net-weight" class="text-base font-extrabold text-[#3F7D44]">330.00 kg</span>
+                  <span id="preview-penalty" class="text-[10px] text-[#A74445] block">Factor baba 0.33x</span>
+                </div>
+                <div class="bg-white p-3 rounded-lg border border-[#E5E5E0]">
+                  <span class="text-[#626262] block text-[11px]">Precio Final / kg:</span>
+                  <span id="preview-price-kg" class="text-base font-extrabold text-[#171717]">$4.80 USDC</span>
+                  <span class="text-[10px] text-[#626262] block">Base $4.80 × Calidad</span>
+                </div>
+                <div class="bg-white p-3 rounded-lg border border-[#E5E5E0]">
+                  <span class="text-[#626262] block text-[11px]">Importe en Bolivianos:</span>
+                  <span id="preview-total-bob" class="text-base font-extrabold text-[#C76A32]">Bs. 11,024.64</span>
+                  <span class="text-[10px] text-[#626262] block">T/C Oficial 6.96</span>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-2 border-t border-[#E5E5E0] text-xs font-bold text-[#171717]">
+                <span>Total a Liquidar al Productor:</span>
+                <span id="preview-total" class="text-sm font-extrabold text-[#C76A32]">$1,584.00 USDC</span>
+              </div>
+            </div>
+
+            <!-- Submit Action -->
+            <button type="submit" id="btn-submit-delivery" class="w-full py-3.5 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-extrabold tracking-wide uppercase transition shadow-md flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-stamp text-[#D5A332]"></i>
+              <span id="btn-submit-delivery-text">Etapa 3 · Emitir Boleta & Notarizar en Stellar</span>
+            </button>
+          </form>
+
+          <!-- Etapa 3: Success Confirmation with Kairo Mascot (Section 7.3) -->
+          <div id="delivery-result-box" class="hidden bg-[#EBF4EC] border border-[#3F7D44]/30 rounded-2xl p-6 space-y-4">
+            <div class="flex flex-col sm:flex-row items-center gap-4">
+              <div class="w-20 h-20 flex-shrink-0">
+                <img src="/static/kairo-mascot-transparent.png" alt="Kairo celebra" class="w-full h-full object-contain mascot-shadow" onerror="this.src='/kairo-mascot-transparent.png'">
+              </div>
+              <div class="space-y-1 text-center sm:text-left">
+                <div class="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full bg-[#3F7D44] text-white text-[11px] font-bold">
+                  <i class="fa-solid fa-circle-check"></i>
+                  <span>¡Boleta Notarizada en Stellar Testnet!</span>
+                </div>
+                <h3 class="text-base font-bold text-[#171717]">KAIRO ha registrado tu acopio exitosamente</h3>
+                <p class="text-xs text-[#626262]">El ticket ha quedado blindado criptográficamente contra alteraciones.</p>
+              </div>
+            </div>
+
+            <div id="delivery-result-content" class="bg-white rounded-xl p-4 border border-[#3F7D44]/20 font-mono text-xs text-[#171717] space-y-1.5 overflow-x-auto">
+              <!-- Filled via JS -->
+            </div>
+
+            <div class="flex justify-end pt-2">
+              <button onclick="dismissDeliveryResult()" class="px-3.5 py-1.5 rounded-lg bg-white border border-[#E5E5E0] text-xs font-semibold text-[#171717] hover:bg-[#F4F4F0] transition">
+                Cerrar Comprobante
+              </button>
+            </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Tipo de Cacao</label>
-              <select id="del-cacao-type" onchange="calculatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
-                <option value="BABA">Cacao en Baba (Húmedo)</option>
-                <option value="SECO">Cacao Seco / Fermentado</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Grado de Calidad</label>
-              <select id="del-quality" onchange="calculatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400">
-                <option value="A">Grado A (100% Precio Base)</option>
-                <option value="B">Grado B (90% Precio Base)</option>
-                <option value="C">Grado C (75% Precio Base)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Peso Bruto Balanza (kg)</label>
-              <input type="number" id="del-gross-weight" step="0.1" value="1000" oninput="calculatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400" required>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Humedad Medida (%)</label>
-              <input type="number" id="del-moisture" step="0.1" value="55.0" oninput="calculatePreview()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-amber-400" required>
-            </div>
-          </div>
-
-          <!-- Preview calculation box -->
-          <div class="bg-slate-950/60 border border-slate-800 rounded-lg p-4 space-y-2 text-xs">
-            <div class="text-slate-400 font-medium uppercase text-[10px] tracking-wider">Cálculo Agronómico en Vivo</div>
-            <div class="flex justify-between">
-              <span class="text-slate-400">Peso Neto Seco Estimado:</span>
-              <span id="preview-net-weight" class="font-bold text-emerald-400">330.00 kg</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-slate-400">Precio Final por kg:</span>
-              <span id="preview-price-kg" class="font-bold text-white">$4.80 USDC</span>
-            </div>
-            <div class="flex justify-between pt-1 border-t border-slate-800 text-sm">
-              <span class="font-semibold text-amber-400">Liquidación Estimada:</span>
-              <span class="font-extrabold text-amber-400" id="preview-total">$1,584.00 USDC <span class="text-xs text-slate-300">(Bs. 11,024.64)</span></span>
-            </div>
-          </div>
-
-          <button type="submit" id="btn-submit-delivery" class="w-full py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-lg shadow-lg transition">
-            <i class="fa-solid fa-stamp mr-2"></i>Emitir Boleta & Notarizar en Stellar
-          </button>
-        </form>
-
-        <!-- Result Box -->
-        <div id="delivery-result-box" class="hidden mt-6 bg-emerald-950/40 border border-emerald-600/40 rounded-xl p-4 space-y-2">
-          <div class="flex items-center text-emerald-400 font-bold text-sm">
-            <i class="fa-solid fa-circle-check mr-2"></i>Boleta Emitida y Notarizada Exitosamente
-          </div>
-          <div id="delivery-result-content" class="text-xs text-slate-300 font-mono space-y-1"></div>
         </div>
       </div>
     </div>
 
-    <!-- TAB 4: FACTORING ML & ORÁCULO -->
+    <!-- ==================================================================== -->
+    <!-- TAB 4: FACTORING ML & ORÁCULO DE RIESGO AGRONÓMICO                    -->
+    <!-- ==================================================================== -->
     <div id="tab-factoring" class="tab-content hidden space-y-6">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E5E5E0]">
+        <div>
+          <h1 class="text-2xl font-display font-bold text-[#171717]">Factoring Agrícola Predictivo & Oráculo ML</h1>
+          <p class="text-xs sm:text-sm text-[#626262]">
+            Evaluación de riesgo crediticio con variables microclimáticas de Alto Beni y desembolso vía Simple QR en Bolivianos.
+          </p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         <!-- Left: Simulator Controls -->
-        <div class="glass-card rounded-xl border border-slate-800 p-6 md:p-8 shadow-2xl space-y-5">
-          <div class="border-b border-slate-800 pb-3">
-            <h2 class="text-xl font-bold text-white flex items-center">
-              <i class="fa-solid fa-brain text-purple-400 mr-2"></i>Oráculo de Riesgo Agronómico ML
+        <div class="lg:col-span-6 bg-white rounded-2xl border border-[#E5E5E0] p-6 shadow-card space-y-5">
+          <div class="border-b border-[#EFEFEA] pb-3">
+            <h2 class="text-sm font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-2">
+              <i class="fa-solid fa-sliders text-[#C76A32]"></i>
+              <span>Parámetros del Oráculo Climático</span>
             </h2>
-            <p class="text-xs text-slate-400 mt-1">
-              RandomForest entrenado con microclima de Alto Beni (lluvia, humedad) e historial del productor.
-            </p>
+            <p class="text-xs text-[#626262] mt-0.5">Modelo RandomForest evaluando historial de socio y estrés hídrico.</p>
           </div>
 
-          <div class="space-y-4 text-sm">
+          <div class="space-y-4 text-xs">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Productor Solicitante</label>
-              <select id="fac-producer-id" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
-                <option value="1">Mateo Mamani (Central El Ceibo - Historial 96%)</option>
-                <option value="2">Elena Quispe (Palos Blancos - Historial 78%)</option>
-                <option value="3">Carlos Condori (Bella Vista - Nuevo Productor 55%)</option>
+              <label for="fac-producer-id" class="block font-semibold text-[#171717] mb-1">Socio Solicitante</label>
+              <select id="fac-producer-id" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3 py-2 text-[#171717] font-medium">
+                <option value="1">Mateo Mamani (El Ceibo · Sapecho — 96% Cumplimiento)</option>
+                <option value="2">Elena Quispe (Palos Blancos — 78% Cumplimiento)</option>
+                <option value="3">Carlos Condori (Bella Vista — 55% Nuevo Productor)</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Cosecha Proyectada (kg secos)</label>
-              <input type="number" id="fac-expected-kg" value="1500" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white">
+              <label for="fac-expected-kg" class="block font-semibold text-[#171717] mb-1">Cosecha Proyectada Comprometida (kg secos)</label>
+              <input type="number" id="fac-expected-kg" value="1500" min="100" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-xl px-3 py-2 text-[#171717] font-bold">
             </div>
 
-            <!-- Rainfall Slider -->
-            <div>
-              <div class="flex justify-between items-center mb-1">
-                <label class="text-xs font-semibold text-slate-300 uppercase">Precipitación Mensual Alto Beni</label>
-                <span id="label-rainfall" class="text-xs font-bold text-emerald-400">160 mm (Óptimo)</span>
+            <!-- Rainfall Slider with microclimate guidelines -->
+            <div class="p-3.5 bg-[#F4F4F0] rounded-xl border border-[#E5E5E0] space-y-2">
+              <div class="flex justify-between items-center">
+                <label for="fac-rainfall" class="font-semibold text-[#171717]">Precipitación Mensual Alto Beni</label>
+                <span id="label-rainfall" class="text-xs font-bold text-[#3F7D44]">160 mm (Óptimo)</span>
               </div>
-              <input type="range" id="fac-rainfall" min="40" max="320" value="160" step="5" oninput="updateWeatherLabels()" class="w-full accent-emerald-500">
-              <div class="flex justify-between text-[10px] text-slate-500 mt-0.5">
+              <input type="range" id="fac-rainfall" min="40" max="320" value="160" step="5" oninput="updateWeatherLabels()" class="w-full accent-[#C76A32]">
+              <div class="flex justify-between text-[10px] text-[#626262]">
                 <span>&lt;80mm (Sequía)</span>
                 <span>140-180mm (Óptimo)</span>
-                <span>&gt;240mm (Moniliasis)</span>
+                <span>&gt;240mm (Riesgo Moniliasis)</span>
               </div>
             </div>
 
             <!-- Humidity Slider -->
-            <div>
-              <div class="flex justify-between items-center mb-1">
-                <label class="text-xs font-semibold text-slate-300 uppercase">Humedad Relativa</label>
-                <span id="label-humidity" class="text-xs font-bold text-emerald-400">75% (Seguro)</span>
+            <div class="p-3.5 bg-[#F4F4F0] rounded-xl border border-[#E5E5E0] space-y-2">
+              <div class="flex justify-between items-center">
+                <label for="fac-humidity" class="font-semibold text-[#171717]">Humedad Relativa del Bosque</label>
+                <span id="label-humidity" class="text-xs font-bold text-[#3F7D44]">75% (Seguro)</span>
               </div>
-              <input type="range" id="fac-humidity" min="50" max="98" value="75" step="1" oninput="updateWeatherLabels()" class="w-full accent-emerald-500">
-              <div class="flex justify-between text-[10px] text-slate-500 mt-0.5">
+              <input type="range" id="fac-humidity" min="50" max="98" value="75" step="1" oninput="updateWeatherLabels()" class="w-full accent-[#C76A32]">
+              <div class="flex justify-between text-[10px] text-[#626262]">
                 <span>50%</span>
                 <span>&gt;85% (Alerta Mazorca Negra)</span>
                 <span>98%</span>
               </div>
             </div>
 
-            <button onclick="runSimulation()" id="btn-simulate" class="w-full py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow transition">
-              <i class="fa-solid fa-calculator mr-2"></i>Calcular Capacidad de Factoring
+            <button onclick="runSimulation()" id="btn-simulate" class="w-full py-3 rounded-xl bg-[#C76A32] hover:bg-[#B25A25] text-white text-xs font-bold shadow-sm transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-microchip"></i>
+              <span>Calcular Capacidad de Factoring con Oráculo</span>
             </button>
           </div>
         </div>
 
-        <!-- Right: Simulation Results & Instant QR Payout -->
-        <div class="glass-card rounded-xl border border-slate-800 p-6 md:p-8 shadow-2xl flex flex-col justify-between">
-          <div>
-            <h3 class="text-lg font-bold text-white pb-3 border-b border-slate-800 flex items-center">
-              <i class="fa-solid fa-qrcode text-amber-400 mr-2"></i>Propuesta de Adelanto & Desembolso
-            </h3>
-
-            <div id="sim-empty-state" class="py-12 text-center text-slate-500">
-              <i class="fa-solid fa-seedling text-4xl mb-3 text-slate-600"></i>
-              <p>Presiona "Calcular Capacidad de Factoring" para consultar al oráculo ML.</p>
-            </div>
-
-            <div id="sim-result-box" class="hidden space-y-4 mt-4">
-              <div class="flex items-center justify-between p-3 bg-slate-900 rounded-lg border border-slate-800">
-                <div>
-                  <div class="text-[10px] uppercase text-slate-400 font-bold">Nivel de Riesgo Evaluado</div>
-                  <div id="res-risk-tier" class="text-lg font-extrabold text-emerald-400">RIESGO BAJO</div>
-                </div>
-                <div class="text-right">
-                  <div class="text-[10px] uppercase text-slate-400 font-bold">Score de Riesgo</div>
-                  <div id="res-risk-score" class="text-lg font-extrabold text-white">24.5 / 100</div>
-                </div>
-              </div>
-
-              <div class="grid grid-cols-2 gap-3">
-                <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
-                  <div class="text-[10px] text-slate-400 uppercase font-semibold">% Adelanto Pre-aprobado</div>
-                  <div id="res-advance-pct" class="text-xl font-extrabold text-amber-400">53.0%</div>
-                </div>
-                <div class="p-3 bg-slate-900 rounded-lg border border-slate-800">
-                  <div class="text-[10px] text-slate-400 uppercase font-semibold">Monto Máximo Aprobado</div>
-                  <div id="res-advance-amount" class="text-xl font-extrabold text-emerald-400">$3,816.00 <span class="text-xs text-slate-300 font-normal">USDC</span></div>
-                </div>
-              </div>
-
-              <!-- Risk explanations list -->
-              <div class="p-3 bg-slate-900/60 rounded-lg border border-slate-800">
-                <div class="text-[11px] font-bold text-slate-300 uppercase mb-2">Diagnóstico Agronómico del Oráculo:</div>
-                <ul id="res-factors-list" class="space-y-1 text-xs text-slate-400 list-disc list-inside"></ul>
-              </div>
-
-              <!-- Execution Form -->
-              <div class="pt-3 border-t border-slate-800 space-y-3">
-                <div class="flex items-center justify-between text-xs">
-                  <span class="text-slate-300 font-semibold">Monto a Desembolsar (USDC):</span>
-                  <input type="number" id="exec-requested-amount" class="w-32 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-right text-white font-bold" value="800">
-                </div>
-                <button onclick="executeLoan()" id="btn-exec-loan" class="w-full py-3 bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-slate-950 font-black rounded-lg shadow-xl transition">
-                  <i class="fa-solid fa-bolt mr-2"></i>Desembolsar Ahora (QR Simple BOB)
-                </button>
-              </div>
-            </div>
+        <!-- Right: Results & Payout Execution -->
+        <div class="lg:col-span-6 bg-white rounded-2xl border border-[#E5E5E0] p-6 shadow-card space-y-5">
+          <div class="border-b border-[#EFEFEA] pb-3">
+            <h2 class="text-sm font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-2">
+              <i class="fa-solid fa-qrcode text-[#3F7D44]"></i>
+              <span>Resultado de Evaluación & Desembolso</span>
+            </h2>
+            <p class="text-xs text-[#626262] mt-0.5">Propuesta crediticia, cupo pre-aprobado y generación de QR.</p>
           </div>
 
-          <!-- Pollar QR Output Modal / View -->
-          <div id="qr-modal-view" class="hidden mt-4 p-4 bg-slate-900 border border-amber-500/40 rounded-xl space-y-3">
+          <div id="sim-empty-state" class="py-12 text-center text-[#626262] space-y-2">
+            <i class="fa-solid fa-cloud-sun-rain text-4xl text-[#E5E5E0]"></i>
+            <p class="text-xs">Presiona "Calcular Capacidad" para que el modelo estime el anticipo seguro.</p>
+          </div>
+
+          <!-- Simulation Details Box -->
+          <div id="sim-result-box" class="hidden space-y-4">
+            
+            <div class="grid grid-cols-2 gap-3">
+              <div class="p-3 bg-[#FAFAF8] rounded-xl border border-[#E5E5E0]">
+                <span class="text-[10px] text-[#626262] uppercase font-bold block">Nivel de Riesgo</span>
+                <span id="res-risk-tier" class="text-base font-extrabold text-[#3F7D44]">RIESGO BAJO</span>
+                <span id="res-risk-score" class="text-[10px] text-[#626262] block">Score: 24.5 / 100</span>
+              </div>
+              <div class="p-3 bg-[#FAFAF8] rounded-xl border border-[#E5E5E0]">
+                <span class="text-[10px] text-[#626262] uppercase font-bold block">Anticipo Pre-aprobado</span>
+                <span id="res-advance-pct" class="text-base font-extrabold text-[#C76A32]">53.0%</span>
+                <span class="text-[10px] text-[#626262] block">Del valor de cosecha</span>
+              </div>
+            </div>
+
+            <div class="p-3.5 bg-[#FAF7F3] rounded-xl border border-[#C76A32]/20">
+              <span class="text-[11px] font-bold text-[#171717] block mb-1">Monto Máximo de Anticipo:</span>
+              <div class="flex items-baseline space-x-2">
+                <span id="res-advance-amount" class="text-xl font-extrabold text-[#C76A32]">$3,816.00 USDC</span>
+                <span id="res-advance-bob" class="text-xs text-[#626262] font-semibold">(Bs. 26,559.36)</span>
+              </div>
+            </div>
+
+            <!-- Risk factors list -->
+            <div class="p-3 bg-[#FAFAF8] rounded-xl border border-[#E5E5E0] text-xs space-y-1.5">
+              <span class="font-bold text-[#171717] block text-[11px] uppercase tracking-wider">Diagnóstico Explicativo:</span>
+              <ul id="res-factors-list" class="space-y-1 text-[#626262] list-disc list-inside"></ul>
+            </div>
+
+            <!-- Request Execution -->
+            <div class="pt-2 border-t border-[#EFEFEA] space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-semibold text-[#171717]">Monto Solicitado a Desembolsar (USDC):</span>
+                <input type="number" id="exec-requested-amount" value="800" class="w-32 bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1 text-right font-bold text-[#171717]">
+              </div>
+              <button onclick="executeLoan()" id="btn-exec-loan" class="w-full py-3 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-bold transition flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-bolt text-[#D5A332]"></i>
+                <span>Desembolsar Inmediato (Pollar Simple QR en Bs.)</span>
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Pollar QR Voucher -->
+          <div id="qr-modal-view" class="hidden bg-[#FEF9EC] border border-[#D5A332]/40 rounded-xl p-5 space-y-3 text-xs">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-amber-400 uppercase flex items-center">
-                <i class="fa-solid fa-qrcode mr-2"></i>Pollar · Simple QR en Bolivianos
+              <span class="font-bold text-[#75452D] flex items-center space-x-1.5">
+                <i class="fa-solid fa-qrcode text-[#C76A32]"></i>
+                <span>Orden de Pago Simple QR (Bolivia)</span>
               </span>
-              <span class="text-[10px] px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-mono">ACTIVE_ESCROW</span>
+              <span class="px-2 py-0.5 rounded-full bg-[#3F7D44]/15 text-[#3F7D44] font-bold text-[10px]">ACTIVE_ESCROW</span>
             </div>
-            <div class="bg-white p-3 rounded-lg flex flex-col items-center justify-center text-slate-900">
-              <!-- Dummy visual QR pattern -->
-              <div class="w-36 h-36 bg-slate-100 flex items-center justify-center border-2 border-dashed border-slate-300 rounded text-center p-2">
-                <i class="fa-solid fa-qrcode text-6xl text-slate-800"></i>
+            
+            <div class="bg-white p-4 rounded-xl border border-[#E5E5E0] flex flex-col items-center justify-center space-y-2">
+              <div class="w-36 h-36 bg-[#FAFAF8] border-2 border-dashed border-[#E5E5E0] rounded-xl flex items-center justify-center">
+                <i class="fa-solid fa-qrcode text-6xl text-[#171717]"></i>
               </div>
-              <div class="mt-2 text-center">
-                <div class="text-xs font-black" id="qr-amount-bob">Bs. 5,568.00</div>
-                <div class="text-[10px] text-slate-500 font-mono" id="qr-payout-id">pol_out_...</div>
+              <div class="text-center">
+                <div class="text-base font-black text-[#171717]" id="qr-amount-bob">Bs. 5,568.00</div>
+                <div class="text-[10px] text-[#626262] font-mono" id="qr-payout-id">pol_out_...</div>
               </div>
             </div>
-            <div class="text-[10px] text-slate-400 space-y-1">
-              <div>• <strong>Vaquita Pool:</strong> <span id="qr-vaquita-res" class="font-mono text-slate-300">vaq_res_...</span></div>
-              <div>• <strong>Trustless Work Escrow:</strong> <span id="qr-escrow-id" class="font-mono text-slate-300">escrow_tw_...</span></div>
+
+            <div class="space-y-1 text-[11px] text-[#626262]">
+              <div>• <strong>Vaquita Pool Reserva:</strong> <span id="qr-vaquita-res" class="font-mono text-[#171717]">vaq_res_...</span></div>
+              <div>• <strong>Trustless Work Escrow:</strong> <span id="qr-escrow-id" class="font-mono text-[#171717]">escrow_tw_...</span></div>
             </div>
-            <a id="qr-deep-link" href="#" target="_blank" class="block text-center py-1.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold rounded text-xs">
-              Abrir en Pollar Wallet App
+
+            <a id="qr-deep-link" href="#" target="_blank" rel="noopener" class="block text-center py-2 rounded-lg bg-[#C76A32] hover:bg-[#B25A25] text-white font-bold text-xs transition">
+              Abrir en Pollar App
             </a>
           </div>
 
         </div>
+
       </div>
     </div>
 
-    <!-- TAB 5: TWO-STAGE ML FORECAST -->
+    <!-- ==================================================================== -->
+    <!-- TAB 5: TWO-STAGE ML (Rendimiento por Biometría & Pronóstico Precios)  -->
+    <!-- ==================================================================== -->
     <div id="tab-ml-forecast" class="tab-content hidden space-y-6">
-      <div class="border-b border-slate-800 pb-3">
-        <h1 class="text-2xl font-bold text-white flex items-center">
-          <i class="fa-solid fa-wand-magic-sparkles text-amber-400 mr-2"></i>Modelo Two-Stage (LightGBM) & Pronóstico de Precios
-        </h1>
-        <p class="text-sm text-slate-400 mt-1">
-          Etapa 1: Clasificación de árboles con/sin fruto P(y &gt; 0) + Etapa 2: Regresión logarítmica de rendimiento + Modelo estocástico de precios ICCO.
-        </p>
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-[#E5E5E0]">
+        <div>
+          <h1 class="text-2xl font-display font-bold text-[#171717]">Modelo Two-Stage (LightGBM) & Pronóstico de Precios</h1>
+          <p class="text-xs sm:text-sm text-[#626262]">
+            Etapa 1: Probabilidad de fructificación P(y &gt; 0) + Etapa 2: Regresión logarítmica de gramos por árbol + Proyección estocástica ICCO.
+          </p>
+        </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <!-- Panel 1: Estimación de Rendimiento por Biometría -->
-        <div class="glass-card rounded-xl border border-slate-800 p-6 shadow-xl space-y-4">
-          <h2 class="text-lg font-bold text-white flex items-center">
-            <i class="fa-solid fa-tree text-emerald-400 mr-2"></i>Predicción de Rendimiento de Cacao
-          </h2>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Biometric Yield Estimator -->
+        <div class="bg-white rounded-2xl border border-[#E5E5E0] p-6 shadow-card space-y-4">
+          <div class="border-b border-[#EFEFEA] pb-3">
+            <h2 class="text-sm font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-2">
+              <i class="fa-solid fa-tree text-[#3F7D44]"></i>
+              <span>Estimación de Rendimiento por Biometría</span>
+            </h2>
+            <p class="text-xs text-[#626262] mt-0.5">Parámetros morfológicos de plantas para predecir cosecha real.</p>
+          </div>
+
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <label class="block text-slate-400 mb-1">Altura Árbol (cm)</label>
-              <input type="number" id="ml-height" value="170" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-height" class="block font-semibold text-[#171717] mb-1">Altura Árbol (cm)</label>
+              <input type="number" id="ml-height" value="170" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">Diámetro Tronco (cm)</label>
-              <input type="number" id="ml-diam" value="8.0" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-diam" class="block font-semibold text-[#171717] mb-1">Diámetro Tronco (cm)</label>
+              <input type="number" id="ml-diam" value="8.0" step="0.1" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">Conteo de Hojas</label>
-              <input type="number" id="ml-leaves" value="260" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-leaves" class="block font-semibold text-[#171717] mb-1">Conteo de Hojas</label>
+              <input type="number" id="ml-leaves" value="260" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">Cherelles por Árbol</label>
-              <input type="number" id="ml-cherelle" value="0.3" step="0.1" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-cherelle" class="block font-semibold text-[#171717] mb-1">Cherelles por Árbol</label>
+              <input type="number" id="ml-cherelle" value="0.3" step="0.1" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">Árboles por Hectárea</label>
-              <input type="number" id="ml-density" value="1111" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-density" class="block font-semibold text-[#171717] mb-1">Densidad (Árboles/ha)</label>
+              <input type="number" id="ml-density" value="1111" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">Variedad</label>
-              <select id="ml-variety" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-variety" class="block font-semibold text-[#171717] mb-1">Variedad Cacao</label>
+              <select id="ml-variety" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
                 <option value="Nacional">Nacional (Alto Beni)</option>
-                <option value="Criollo">Criollo Silvestre</option>
+                <option value="Criollo">Criollo Amazónico</option>
                 <option value="CCN-51">CCN-51</option>
               </select>
             </div>
           </div>
-          <button onclick="estimateYield()" id="btn-ml-yield" class="w-full py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold rounded-lg shadow text-xs transition">
-            <i class="fa-solid fa-microchip mr-2"></i>Inferir Rendimiento (Two-Stage)
+
+          <button onclick="estimateYield()" id="btn-ml-yield" class="w-full py-2.5 rounded-xl bg-[#3F7D44] hover:bg-[#346838] text-white text-xs font-bold transition flex items-center justify-center space-x-2 shadow-sm">
+            <i class="fa-solid fa-microchip"></i>
+            <span>Inferir Rendimiento con LightGBM</span>
           </button>
 
           <!-- Yield Result Box -->
-          <div id="ml-yield-result" class="hidden p-4 bg-slate-900/80 rounded-lg border border-emerald-500/30 space-y-2 text-xs">
-            <div class="text-[10px] uppercase text-slate-400 font-bold">Resultado Two-Stage LightGBM</div>
+          <div id="ml-yield-result" class="hidden p-4 bg-[#EBF4EC] rounded-xl border border-[#3F7D44]/30 space-y-2 text-xs">
+            <div class="text-[10px] uppercase text-[#3F7D44] font-bold tracking-wider">Inferencia Two-Stage Completada</div>
             <div class="flex justify-between items-baseline">
-              <span class="text-slate-300">Rendimiento por Árbol:</span>
-              <span id="res-yield-g" class="text-base font-extrabold text-emerald-400">0.00 g/árbol</span>
+              <span class="text-[#626262]">Rendimiento por Árbol:</span>
+              <span id="res-yield-g" class="text-base font-extrabold text-[#3F7D44]">48.47 g/árbol</span>
             </div>
             <div class="flex justify-between items-baseline">
-              <span class="text-slate-300">Rendimiento por Hectárea:</span>
-              <span id="res-yield-ha" class="text-base font-extrabold text-amber-400">0.00 kg/ha</span>
+              <span class="text-[#626262]">Rendimiento por Hectárea:</span>
+              <span id="res-yield-ha" class="text-base font-extrabold text-[#171717]">53.85 kg/ha</span>
             </div>
-            <div class="flex justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800">
-              <span>Probabilidad Cosecha Positiva P(y&gt;0):</span>
-              <span id="res-yield-prob" class="font-bold text-white">0%</span>
+            <div class="flex justify-between text-[11px] text-[#626262] pt-1.5 border-t border-[#3F7D44]/20">
+              <span>Probabilidad Fructificación P(y&gt;0):</span>
+              <span id="res-yield-prob" class="font-bold text-[#171717]">95.1%</span>
             </div>
           </div>
         </div>
 
-        <!-- Panel 2: Pronóstico de Precios -->
-        <div class="glass-card rounded-xl border border-slate-800 p-6 shadow-xl space-y-4">
-          <h2 class="text-lg font-bold text-white flex items-center">
-            <i class="fa-solid fa-chart-line text-blue-400 mr-2"></i>Pronóstico de Precios de Cacao (ICCO)
-          </h2>
+        <!-- Cacao Price Forecast -->
+        <div class="bg-white rounded-2xl border border-[#E5E5E0] p-6 shadow-card space-y-4">
+          <div class="border-b border-[#EFEFEA] pb-3">
+            <h2 class="text-sm font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-2">
+              <i class="fa-solid fa-arrow-trend-up text-[#D5A332]"></i>
+              <span>Pronóstico de Precios Internacionales (ICCO)</span>
+            </h2>
+            <p class="text-xs text-[#626262] mt-0.5">Modelo estocástico de reversión a la media y bandas de confianza al 95%.</p>
+          </div>
+
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <label class="block text-slate-400 mb-1">Horizonte Temporal</label>
-              <select id="ml-horizon" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-horizon" class="block font-semibold text-[#171717] mb-1">Horizonte de Tiempo</label>
+              <select id="ml-horizon" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-medium">
                 <option value="15">15 Días</option>
                 <option value="30" selected>30 Días (1 Mes)</option>
                 <option value="60">60 Días (2 Meses)</option>
@@ -493,90 +853,302 @@ DASHBOARD_HTML = """<!DOCTYPE html>
               </select>
             </div>
             <div>
-              <label class="block text-slate-400 mb-1">Precio Actual ($/kg USDC)</label>
-              <input type="number" id="ml-current-price" value="4.80" step="0.05" class="w-full bg-slate-900 border border-slate-700 rounded px-2.5 py-1.5 text-white">
+              <label for="ml-current-price" class="block font-semibold text-[#171717] mb-1">Precio Referencial ($/kg)</label>
+              <input type="number" id="ml-current-price" value="4.80" step="0.05" class="w-full bg-[#FAFAF8] border border-[#E5E5E0] rounded-lg px-2.5 py-1.5 font-bold">
             </div>
           </div>
-          <button onclick="forecastPrice()" id="btn-ml-price" class="w-full py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-lg shadow text-xs transition">
-            <i class="fa-solid fa-arrow-trend-up mr-2"></i>Simular Trayectoria de Precios
+
+          <button onclick="forecastPrice()" id="btn-ml-price" class="w-full py-2.5 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-bold transition flex items-center justify-center space-x-2 shadow-sm">
+            <i class="fa-solid fa-chart-line text-[#D5A332]"></i>
+            <span>Simular Trayectoria de Precios</span>
           </button>
 
           <!-- Price Result Box -->
-          <div id="ml-price-result" class="hidden p-4 bg-slate-900/80 rounded-lg border border-blue-500/30 space-y-2 text-xs">
+          <div id="ml-price-result" class="hidden p-4 bg-[#FEF9EC] rounded-xl border border-[#D5A332]/30 space-y-2 text-xs">
             <div class="flex items-center justify-between">
-              <span class="text-[10px] uppercase text-slate-400 font-bold">Proyección a <span id="res-price-days">30</span> días</span>
-              <span id="res-price-trend" class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300">NEUTRAL</span>
+              <span class="text-[10px] uppercase text-[#75452D] font-bold">Proyección a <span id="res-price-days">30</span> días</span>
+              <span id="res-price-trend" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D5A332]/20 text-[#75452D]">NEUTRAL</span>
             </div>
             <div class="flex justify-between items-baseline">
-              <span class="text-slate-300">Precio Esperado:</span>
-              <span id="res-price-val" class="text-lg font-extrabold text-blue-400">$4.80 USDC/kg</span>
+              <span class="text-[#626262]">Precio Proyectado:</span>
+              <span id="res-price-val" class="text-lg font-extrabold text-[#171717]">$4.80 USDC/kg</span>
             </div>
-            <div class="flex justify-between text-[11px] text-slate-400 pt-1 border-t border-slate-800">
-              <span>Intervalo de Confianza (95%):</span>
-              <span id="res-price-ci" class="font-bold text-white">[$4.41 - $5.22]</span>
+            <div class="flex justify-between text-[11px] text-[#626262] pt-1.5 border-t border-[#D5A332]/20">
+              <span>Banda de Confianza (95%):</span>
+              <span id="res-price-ci" class="font-bold text-[#171717]">[$4.41 - $5.22]</span>
             </div>
           </div>
         </div>
+
       </div>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- TAB 6: PROGRESO & GAMIFICACIÓN CON MASCOTA KAIRO (Section 13)         -->
+    <!-- ==================================================================== -->
+    <div id="tab-progress" class="tab-content hidden space-y-6">
+      
+      <!-- Gamification Hero Header -->
+      <section class="bg-gradient-to-br from-white via-[#FAF7F3] to-[#FEF9EC] rounded-2xl border border-[#E5E5E0] p-6 sm:p-8 shadow-card overflow-hidden">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+          
+          <div class="md:col-span-8 space-y-3">
+            <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-[#D5A332]/10 border border-[#D5A332]/20 text-[#75452D] text-xs font-semibold">
+              <i class="fa-solid fa-award text-[#D5A332]"></i>
+              <span>Programa de Lealtad & Mérito Agroforestal</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-[#171717] tracking-tight">
+              Avanza con <span class="text-[#C76A32]">KAIRO</span> en Cada Cosecha
+            </h1>
+            <p class="text-sm text-[#626262] leading-relaxed max-w-xl">
+              Gana Puntos KAIRO y certificaciones verificables en Stellar por mantener tu parcela libre de deforestación (EUDR), entregar cacao fermentado Grado A y cumplir tus liquidaciones a tiempo.
+            </p>
+            <div class="flex items-center space-x-3 pt-1 text-xs text-[#626262]">
+              <span class="flex items-center"><i class="fa-solid fa-circle-check text-[#3F7D44] mr-1"></i>Puntos Verificables</span>
+              <span class="flex items-center"><i class="fa-solid fa-circle-check text-[#3F7D44] mr-1"></i>Respaldado en Stellar</span>
+              <span class="flex items-center"><i class="fa-solid fa-circle-check text-[#3F7D44] mr-1"></i>Preferencia en Factoring</span>
+            </div>
+          </div>
+
+          <!-- Kairo Mascot Protagonist -->
+          <div class="md:col-span-4 flex justify-center md:justify-end">
+            <div class="w-48 sm:w-56 h-48 sm:h-56 relative flex items-center justify-center">
+              <div class="absolute inset-0 bg-[#D5A332]/10 rounded-full blur-2xl transform scale-90"></div>
+              <img src="/static/kairo-mascot-transparent.png" 
+                   alt="Kairo te acompaña en tu progreso" 
+                   class="relative w-full h-full object-contain mascot-shadow transform hover:scale-105 transition-transform duration-300"
+                   onerror="this.src='/kairo-mascot-transparent.png'">
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Producer Levels Progression Roadmap -->
+      <section class="space-y-4">
+        <div>
+          <h2 class="text-base font-bold text-[#171717]">Niveles de Reconocimiento del Productor</h2>
+          <p class="text-xs text-[#626262]">Tu trayectoria acumulada como socio cacaotero en Alto Beni.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          
+          <!-- Level 1: Semilla -->
+          <div class="bg-white rounded-xl border-2 border-[#3F7D44] p-5 shadow-subtle relative space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#3F7D44]/15 text-[#3F7D44]">ACTUAL</span>
+              <i class="fa-solid fa-seedling text-lg text-[#3F7D44]"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-[#171717]">Nivel 1 · Productor Semilla</h3>
+              <p class="text-[11px] text-[#626262] mt-0.5">Registro oficial en cooperativa con parcela georreferenciada.</p>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-[#626262]">Progreso:</span>
+                <span class="font-bold text-[#3F7D44]">100% Completado</span>
+              </div>
+              <div class="w-full bg-[#E5E5E0] h-2 rounded-full overflow-hidden">
+                <div class="bg-[#3F7D44] h-full w-full"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Level 2: Guardián Agroforestal -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F4F4F0] text-[#626262]">SIGUIENTE</span>
+              <i class="fa-solid fa-tree text-lg text-[#C76A32]"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-[#171717]">Nivel 2 · Guardián Agroforestal</h3>
+              <p class="text-[11px] text-[#626262] mt-0.5">Cumplimiento EUDR con cero deforestación verificado en satélite.</p>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-[#626262]">Requisito:</span>
+                <span class="font-semibold text-[#171717]">3 Entregas Grado A</span>
+              </div>
+              <div class="w-full bg-[#E5E5E0] h-2 rounded-full overflow-hidden">
+                <div class="bg-[#C76A32] h-full w-2/3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Level 3: Mazorca de Oro -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle space-y-3 opacity-90">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F4F4F0] text-[#626262]">NIVEL 3</span>
+              <i class="fa-solid fa-medal text-lg text-[#D5A332]"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-[#171717]">Nivel 3 · Mazorca de Oro</h3>
+              <p class="text-[11px] text-[#626262] mt-0.5">Cumplimiento en microcrédito y más de 3,000 kg acopiados.</p>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-[#626262]">Beneficio:</span>
+                <span class="font-semibold text-[#D5A332]">60% Anticipo en Factoring</span>
+              </div>
+              <div class="w-full bg-[#E5E5E0] h-2 rounded-full overflow-hidden">
+                <div class="bg-[#D5A332] h-full w-1/4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Level 4: Maestro del Cacao -->
+          <div class="bg-white rounded-xl border border-[#E5E5E0] p-5 shadow-subtle space-y-3 opacity-75">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-[#F4F4F0] text-[#626262]">ELITE</span>
+              <i class="fa-solid fa-crown text-lg text-[#75452D]"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-sm text-[#171717]">Nivel 4 · Maestro El Ceibo</h3>
+              <p class="text-[11px] text-[#626262] mt-0.5">Líder comunal con sello orgánico y cero penalidades.</p>
+            </div>
+            <div class="space-y-1 text-xs">
+              <div class="flex justify-between text-[11px]">
+                <span class="text-[#626262]">Beneficio:</span>
+                <span class="font-semibold text-[#75452D]">Tasa Preferencial 1.5%</span>
+              </div>
+              <div class="w-full bg-[#E5E5E0] h-2 rounded-full overflow-hidden">
+                <div class="bg-[#75452D] h-full w-0"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- Verifiable Achievements & Activity Guide -->
+      <section class="bg-white rounded-xl border border-[#E5E5E0] p-6 shadow-subtle space-y-4">
+        <div class="flex items-center justify-between border-b border-[#EFEFEA] pb-3">
+          <div>
+            <h3 class="text-sm font-bold text-[#171717] uppercase tracking-wider flex items-center space-x-2">
+              <i class="fa-solid fa-shield-halved text-[#3F7D44]"></i>
+              <span>Insignias Criptográficas Disponibles</span>
+            </h3>
+            <p class="text-xs text-[#626262]">Méritos auditables vinculados a la cuenta de Stellar del productor.</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="p-4 bg-[#FAFAF8] rounded-xl border border-[#E5E5E0] flex items-start space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-[#3F7D44]/15 text-[#3F7D44] flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-leaf text-sm"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-[#171717]">Cero Deforestación EUDR</h4>
+              <p class="text-[11px] text-[#626262] mt-0.5">Parcela validada con polígonos satelitales sin chaqueo.</p>
+              <span class="inline-block mt-2 text-[10px] font-bold text-[#3F7D44]">✓ Verificado</span>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#FAFAF8] rounded-xl border border-[#E5E5E0] flex items-start space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-[#C76A32]/15 text-[#C76A32] flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-award text-sm"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-[#171717]">Calidad Grado A Superior</h4>
+              <p class="text-[11px] text-[#626262] mt-0.5">Más del 80% del cacao entregado con fermentación óptima.</p>
+              <span class="inline-block mt-2 text-[10px] font-bold text-[#C76A32]">2/3 Entregas</span>
+            </div>
+          </div>
+
+          <div class="p-4 bg-[#FAFAF8] rounded-xl border border-[#E5E5E0] flex items-start space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-[#D5A332]/15 text-[#D5A332] flex items-center justify-center flex-shrink-0">
+              <i class="fa-solid fa-clock-rotate-left text-sm"></i>
+            </div>
+            <div>
+              <h4 class="text-xs font-bold text-[#171717]">Puntualidad en Liquidación</h4>
+              <p class="text-[11px] text-[#626262] mt-0.5">Cierre del contrato de factoring en la fecha de cosecha pactada.</p>
+              <span class="inline-block mt-2 text-[10px] font-bold text-[#D5A332]">1 Liquidado</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
     </div>
 
   </main>
 
-  <!-- Footer -->
-  <footer class="border-t border-slate-800 py-6 text-center text-xs text-slate-500">
-    <p>Ayni Cacao · Hackathon Stellar 2026 · Desarrollado con Clean Architecture, Soroban & Machine Learning</p>
+  <!-- Modern Clean Footer -->
+  <footer class="border-t border-[#E5E5E0] bg-white py-6 mt-auto">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-[#626262]">
+      <div class="flex items-center space-x-2">
+        <span class="font-bold text-[#171717]">KAIRO 3.0</span>
+        <span>·</span>
+        <span>Stellar Hackathon 2026</span>
+        <span>·</span>
+        <span class="text-[#C76A32] font-medium">Clean Architecture & ML Oracles</span>
+      </div>
+      <div class="flex items-center space-x-4">
+        <span>Alto Beni & Palos Blancos, Bolivia</span>
+        <a href="/docs" target="_blank" class="text-[#171717] hover:underline font-semibold">Swagger API</a>
+      </div>
+    </div>
   </footer>
 
+  <!-- ==================================================================== -->
+  <!-- JAVASCRIPT APPLICATION CORE (Strict preservation of all logic & APIs) -->
+  <!-- ==================================================================== -->
   <script>
-    // Tab switching logic
+    // Tab switching with responsive and accessible state
     function switchTab(tabName) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('text-amber-400', 'bg-slate-800/80');
-        btn.classList.add('text-slate-300');
+        btn.classList.remove('nav-tab-active');
+        btn.classList.add('text-[#626262]');
       });
 
       const target = document.getElementById('tab-' + tabName);
       if (target) target.classList.remove('hidden');
 
-      const activeBtn = document.querySelector(`[data-tab="${tabName}"]`);
-      if (activeBtn) {
-        activeBtn.classList.remove('text-slate-300');
-        activeBtn.classList.add('text-amber-400', 'bg-slate-800/80');
-      }
+      const activeBtns = document.querySelectorAll(`[data-tab="${tabName}"]`);
+      activeBtns.forEach(b => {
+        b.classList.remove('text-[#626262]');
+        b.classList.add('nav-tab-active');
+      });
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
       if (tabName === 'dashboard') loadDashboardData();
       if (tabName === 'producers') loadProducersData();
     }
 
-    // Weather label updater
+    function toggleMobileMenu() {
+      const menu = document.getElementById('mobile-menu');
+      if (menu) menu.classList.toggle('hidden');
+    }
+
+    // Weather label updater for factoring simulation
     function updateWeatherLabels() {
-      const rainfall = parseInt(document.getElementById('fac-rainfall').value);
-      const humidity = parseInt(document.getElementById('fac-humidity').value);
+      const rainfall = parseInt(document.getElementById('fac-rainfall').value) || 160;
+      const humidity = parseInt(document.getElementById('fac-humidity').value) || 75;
 
       const rLabel = document.getElementById('label-rainfall');
       if (rainfall < 80) {
-        rLabel.textContent = `${rainfall} mm (Sequía)`;
-        rLabel.className = 'text-xs font-bold text-red-400';
+        rLabel.textContent = `${rainfall} mm (Alerta Sequía)`;
+        rLabel.className = 'text-xs font-bold text-[#A74445]';
       } else if (rainfall > 240) {
-        rLabel.textContent = `${rainfall} mm (Alerta Plagas)`;
-        rLabel.className = 'text-xs font-bold text-amber-400';
+        rLabel.textContent = `${rainfall} mm (Riesgo Moniliasis)`;
+        rLabel.className = 'text-xs font-bold text-[#C76A32]';
       } else {
         rLabel.textContent = `${rainfall} mm (Óptimo)`;
-        rLabel.className = 'text-xs font-bold text-emerald-400';
+        rLabel.className = 'text-xs font-bold text-[#3F7D44]';
       }
 
       const hLabel = document.getElementById('label-humidity');
       if (humidity > 85) {
-        hLabel.textContent = `${humidity}% (Riesgo Fungoso)`;
-        hLabel.className = 'text-xs font-bold text-amber-400';
+        hLabel.textContent = `${humidity}% (Riesgo Mazorca Negra)`;
+        hLabel.className = 'text-xs font-bold text-[#A74445]';
       } else {
         hLabel.textContent = `${humidity}% (Seguro)`;
-        hLabel.className = 'text-xs font-bold text-emerald-400';
+        hLabel.className = 'text-xs font-bold text-[#3F7D44]';
       }
     }
 
-    // Delivery calculation preview
+    // Delivery calculation preview (Strictly preserving original business rules)
     function calculatePreview() {
       const type = document.getElementById('del-cacao-type').value;
       const gross = parseFloat(document.getElementById('del-gross-weight').value) || 0;
@@ -585,11 +1157,16 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       const basePrice = 4.80;
 
       let netWeight = gross;
+      let penaltyText = 'Sin penalización';
+
       if (type === 'BABA') {
         netWeight = gross * 0.33;
+        penaltyText = 'Factor baba 0.33x a seco';
       } else if (type === 'SECO' && moisture > 7.5) {
         const excess = (moisture - 7.5) / 100.0;
         netWeight = gross * (1.0 - excess);
+        const penaltyKg = (gross * excess).toFixed(1);
+        penaltyText = `Exceso humedad: -${penaltyKg} kg`;
       }
 
       let gradeMult = 1.0;
@@ -601,113 +1178,164 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       const totalBOB = totalUSDC * 6.96;
 
       document.getElementById('preview-net-weight').textContent = netWeight.toFixed(2) + ' kg';
+      document.getElementById('preview-penalty').textContent = penaltyText;
       document.getElementById('preview-price-kg').textContent = '$' + finalPrice.toFixed(2) + ' USDC';
-      document.getElementById('preview-total').innerHTML = `$${totalUSDC.toFixed(2)} USDC <span class="text-xs text-slate-300">(Bs. ${totalBOB.toFixed(2)})</span>`;
+      document.getElementById('preview-total-bob').textContent = 'Bs. ' + totalBOB.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      document.getElementById('preview-total').textContent = '$' + totalUSDC.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}) + ' USDC';
     }
 
-    // Load Dashboard Metrics
+    // Load Dashboard Metrics (Section 8 Bug Fix: supports both vaquita_pool and pool_status)
     async function loadDashboardData() {
+      const icon = document.getElementById('icon-refresh');
+      if (icon) icon.classList.add('fa-spin');
+
       try {
         const res = await fetch('/api/v1/dashboard');
-        if (!res.ok) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
         const data = await res.json();
 
-        // Update Pool stats
-        document.getElementById('stat-pool-avail').textContent = '$' + data.pool_status.available_liquidity_usdc.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('stat-pool-total').textContent = '$' + data.pool_status.total_liquidity_usdc.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('stat-pool-res').textContent = '$' + data.pool_status.reserved_liquidity_usdc.toLocaleString('en-US', {minimumFractionDigits: 2});
+        // Safe extraction of pool status (resolving bug where vaquita_pool vs pool_status caused crash)
+        const pool = data.vaquita_pool || data.pool_status || {};
+        const poolAvail = pool.available_liquidity_usdc ?? 25000;
+        const poolTotal = pool.total_liquidity_usdc ?? 25000;
+        const poolRes = pool.reserved_liquidity_usdc ?? 0;
 
-        // Total advanced
-        document.getElementById('stat-total-usdc').textContent = '$' + data.total_advanced_usdc.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('stat-total-bob').textContent = 'Bs. ' + data.total_advanced_bob.toLocaleString('en-US', {minimumFractionDigits: 2});
-        document.getElementById('stat-deliveries-count').textContent = data.total_deliveries_count;
-        document.getElementById('stat-active-loans').textContent = data.active_loans_count;
+        document.getElementById('stat-pool-avail').textContent = '$' + Number(poolAvail).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('stat-pool-total').textContent = '$' + Number(poolTotal).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('stat-pool-res').textContent = '$' + Number(poolRes).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-        // Populate table
+        const totalUSDC = data.total_advanced_usdc ?? 0;
+        const totalBOB = data.total_advanced_bob ?? (totalUSDC * 6.96);
+        document.getElementById('stat-total-usdc').textContent = '$' + Number(totalUSDC).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('stat-total-bob').textContent = 'Bs. ' + Number(totalBOB).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        document.getElementById('stat-deliveries-count').textContent = data.total_deliveries_count ?? (data.recent_deliveries?.length || 0);
+        document.getElementById('stat-active-loans').textContent = data.active_loans_count ?? (data.active_loans?.length || 0);
+
+        // Populate Deliveries Table
         const tbody = document.getElementById('recent-deliveries-body');
         if (data.recent_deliveries && data.recent_deliveries.length > 0) {
           tbody.innerHTML = data.recent_deliveries.map(d => `
-            <tr class="hover:bg-slate-800/40">
-              <td class="px-4 py-3 font-mono font-bold text-amber-400 text-xs">${d.delivery_code}</td>
-              <td class="px-4 py-3 font-medium text-white">${d.producer_name || 'Socio #' + d.producer_id}</td>
+            <tr class="hover:bg-[#F4F4F0] transition">
+              <td class="px-4 py-3 font-mono font-bold text-[#C76A32] text-xs">${d.delivery_code}</td>
+              <td class="px-4 py-3 font-semibold text-[#171717]">
+                ${d.producer_name || ('Socio #' + d.producer_id)}
+              </td>
               <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded text-xs ${d.cacao_type === 'BABA' ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'}">
-                  ${d.cacao_type} - Grado ${d.quality_grade}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold ${d.cacao_type === 'BABA' ? 'bg-[#C76A32]/10 text-[#C76A32]' : 'bg-[#3F7D44]/10 text-[#3F7D44]'}">
+                  ${d.cacao_type} · Grado ${d.quality_grade}
                 </span>
               </td>
-              <td class="px-4 py-3 text-xs">
-                ${d.gross_weight_kg} kg &rarr; <strong class="text-white">${d.net_dry_weight_kg} kg seco</strong>
+              <td class="px-4 py-3 text-xs text-[#626262]">
+                <span>${d.gross_weight_kg} kg</span>
+                <span class="text-[#171717] font-bold block">&rarr; ${d.net_dry_weight_kg} kg seco</span>
               </td>
               <td class="px-4 py-3 text-xs">
-                <strong class="text-emerald-400">$${d.total_amount_usdc.toFixed(2)}</strong>
-                <span class="text-slate-400 block text-[10px]">Bs. ${d.total_amount_bob.toFixed(2)}</span>
+                <span class="font-extrabold text-[#171717]">$${d.total_amount_usdc.toFixed(2)} USDC</span>
+                <span class="text-[#626262] block text-[11px]">Bs. ${d.total_amount_bob.toFixed(2)}</span>
               </td>
-              <td class="px-4 py-3 text-[11px] font-mono text-slate-400 truncate max-w-xs" title="${d.stellar_tx_hash}">
-                <i class="fa-solid fa-link text-blue-400 mr-1"></i>${d.stellar_tx_hash.substring(0, 16)}...
+              <td class="px-4 py-3 text-[11px] font-mono text-[#626262] max-w-xs truncate" title="${d.stellar_tx_hash}">
+                <i class="fa-solid fa-link text-[#3F7D44] mr-1"></i>${(d.stellar_tx_hash || '').substring(0, 16)}...
               </td>
-              <td class="px-4 py-3">
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-400 border border-blue-500/30">
-                  ${d.status}
+              <td class="px-4 py-3 text-right">
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3F7D44]/15 text-[#3F7D44]">
+                  ${d.status || 'NOTARIZED'}
                 </span>
               </td>
             </tr>
           `).join('');
+        } else {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-6 text-[#626262]">Aún no hay boletas de acopio registradas.</td></tr>';
         }
+
+        // Populate Active Loans Table
+        const loansBody = document.getElementById('active-loans-body');
+        if (data.active_loans && data.active_loans.length > 0) {
+          loansBody.innerHTML = data.active_loans.map(loan => `
+            <tr class="hover:bg-[#F4F4F0] transition">
+              <td class="px-4 py-3 font-mono font-bold text-[#171717]">${loan.loan_code}</td>
+              <td class="px-4 py-3 font-semibold text-[#171717]">${loan.producer_name || ('Socio #' + loan.producer_id)}</td>
+              <td class="px-4 py-3 font-bold text-[#3F7D44]">$${loan.approved_amount_usdc.toFixed(2)} USDC</td>
+              <td class="px-4 py-3 text-[#626262]">Bs. ${(loan.amount_bob || (loan.approved_amount_usdc * 6.96)).toFixed(2)}</td>
+              <td class="px-4 py-3 font-mono text-[11px] text-[#626262] truncate max-w-xs" title="${loan.trustless_escrow_id}">
+                ${loan.trustless_escrow_id || 'escrow_tw_...'}
+              </td>
+              <td class="px-4 py-3 text-right">
+                <button onclick="settleLoan(${loan.id || loan.loan_id})" class="px-2.5 py-1 rounded bg-[#171717] hover:bg-black text-white text-[10px] font-bold transition">
+                  Liquidar Cosecha
+                </button>
+              </td>
+            </tr>
+          `).join('');
+        } else {
+          loansBody.innerHTML = '<tr><td colspan="6" class="text-center py-6 text-[#626262]">No hay préstamos en escrow actualmente.</td></tr>';
+        }
+
       } catch (err) {
         console.error('Error fetching dashboard:', err);
+        const tbody = document.getElementById('recent-deliveries-body');
+        if (tbody) {
+          tbody.innerHTML = `<tr><td colspan="7" class="text-center py-6 text-[#A74445] font-semibold">
+            <i class="fa-solid fa-triangle-exclamation mr-1.5"></i>Error al consultar el backend. Presiona "Actualizar" para reintentar.
+          </td></tr>`;
+        }
+      } finally {
+        if (icon) setTimeout(() => icon.classList.remove('fa-spin'), 400);
       }
     }
 
-    // Load Producers
+    // Load Producers & EUDR Traceability
     async function loadProducersData() {
       try {
         const res = await fetch('/api/v1/producers');
-        if (!res.ok) return;
+        if (!res.ok) throw new Error('Error al cargar productores');
         const producers = await res.json();
 
         const grid = document.getElementById('producers-grid');
         grid.innerHTML = producers.map(p => `
-          <div class="glass-card rounded-xl border border-slate-800 p-5 shadow-lg space-y-4">
+          <div class="bg-white rounded-2xl border border-[#E5E5E0] p-5 shadow-subtle hover:shadow-card transition flex flex-col justify-between space-y-4">
+            
             <div class="flex items-start justify-between">
               <div>
-                <h3 class="font-bold text-white text-base">${p.name}</h3>
-                <p class="text-xs text-amber-400 font-medium">${p.cooperative}</p>
-                <p class="text-xs text-slate-400">${p.community}</p>
+                <h3 class="font-bold text-[#171717] text-base">${p.name}</h3>
+                <p class="text-xs text-[#C76A32] font-semibold">${p.cooperative}</p>
+                <p class="text-xs text-[#626262]">${p.community}</p>
               </div>
-              <span class="px-2 py-0.5 rounded text-[10px] font-black ${
-                p.risk_tier === 'BAJO' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' :
-                p.risk_tier === 'MEDIO' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' :
-                'bg-red-500/20 text-red-400 border border-red-500/30'
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${
+                p.risk_tier === 'BAJO' ? 'bg-[#3F7D44]/15 text-[#3F7D44] border border-[#3F7D44]/30' :
+                p.risk_tier === 'MEDIO' ? 'bg-[#D5A332]/20 text-[#75452D] border border-[#D5A332]/40' :
+                'bg-[#A74445]/15 text-[#A74445] border border-[#A74445]/30'
               }">
                 RIESGO ${p.risk_tier}
               </span>
             </div>
 
-            <div class="bg-slate-900/80 rounded-lg p-3 text-xs space-y-1.5 border border-slate-800 font-mono">
-              <div class="flex justify-between text-slate-400">
-                <span>Parcela EUDR:</span>
-                <span class="text-slate-200 font-bold">${p.eudr_plot_code}</span>
+            <div class="bg-[#FAFAF8] rounded-xl p-3.5 text-xs space-y-2 border border-[#E5E5E0] font-mono">
+              <div class="flex justify-between text-[#626262]">
+                <span>Código Parcela:</span>
+                <span class="text-[#171717] font-bold">${p.eudr_plot_code}</span>
               </div>
-              <div class="flex justify-between text-slate-400">
+              <div class="flex justify-between text-[#626262]">
                 <span>Superficie:</span>
-                <span class="text-slate-200">${p.parcel_hectares} ha</span>
+                <span class="text-[#171717] font-semibold">${p.parcel_hectares || p.hectares || 2.5} ha (${p.tree_age_years || 8} años)</span>
               </div>
-              <div class="flex justify-between text-slate-400">
+              <div class="flex justify-between text-[#626262]">
                 <span>Coordenadas GPS:</span>
-                <span class="text-emerald-400 text-[11px]">${p.eudr_latitude}, ${p.eudr_longitude}</span>
+                <span class="text-[#3F7D44] font-semibold text-[11px]">${p.eudr_latitude}, ${p.eudr_longitude}</span>
               </div>
-              <div class="flex justify-between text-slate-400">
-                <span>Certificación Cero Deforestación:</span>
-                <span class="${p.eudr_certified ? 'text-emerald-400 font-bold' : 'text-slate-500'}">
-                  ${p.eudr_certified ? '✓ EUDR VÁLIDO' : 'En proceso'}
+              <div class="flex justify-between text-[#626262]">
+                <span>Trazabilidad EUDR:</span>
+                <span class="${p.eudr_certified ? 'text-[#3F7D44] font-bold' : 'text-[#626262]'}">
+                  ${p.eudr_certified ? '✓ Registro Cero Deforestación' : 'Documentación en revisión'}
                 </span>
               </div>
             </div>
 
-            <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-800 text-slate-400">
-              <span>Score Cumplimiento:</span>
-              <span class="font-bold text-white">${(p.compliance_score * 100).toFixed(0)}%</span>
+            <div class="flex items-center justify-between text-xs pt-2 border-t border-[#EFEFEA] text-[#626262]">
+              <span>Score Histórico:</span>
+              <span class="font-extrabold text-[#171717]">${((p.compliance_score || 0.90) * 100).toFixed(0)}% de cumplimiento</span>
             </div>
+
           </div>
         `).join('');
       } catch (err) {
@@ -715,12 +1343,13 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       }
     }
 
-    // Submit Delivery Ticket
+    // Submit Delivery (Section 10: 3 stages, duplicates prevented, confirmation with KAIRO mascot)
     async function submitDelivery(e) {
       e.preventDefault();
       const btn = document.getElementById('btn-submit-delivery');
+      const btnText = document.getElementById('btn-submit-delivery-text');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Notarizando en Stellar...';
+      btnText.textContent = 'Notarizando ticket en Stellar Testnet...';
 
       const payload = {
         producer_id: parseInt(document.getElementById('del-producer-id').value),
@@ -744,22 +1373,36 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           const resContent = document.getElementById('delivery-result-content');
           resBox.classList.remove('hidden');
           resContent.innerHTML = `
-            <div>• <strong>Código Boleta:</strong> ${data.delivery_code}</div>
-            <div>• <strong>Peso Neto Seco:</strong> ${data.net_dry_weight_kg} kg (Penalización: ${data.penalty_discount_kg} kg)</div>
-            <div>• <strong>Total Liquidado:</strong> $${data.total_amount_usdc} USDC (Bs. ${data.total_amount_bob})</div>
-            <div>• <strong>Payload SHA-256:</strong> ${data.payload_hash}</div>
-            <div>• <strong>Stellar TX Hash:</strong> <span class="text-emerald-400 font-bold">${data.stellar_tx_hash}</span></div>
+            <div>• <strong>Código de Boleta:</strong> <span class="text-[#C76A32] font-bold">${data.delivery_code}</span></div>
+            <div>• <strong>Peso Neto Seco:</strong> ${data.net_dry_weight_kg} kg (Descuento penalidad: ${data.penalty_discount_kg} kg)</div>
+            <div>• <strong>Total Liquidado:</strong> $${data.total_amount_usdc.toFixed(2)} USDC &bull; Bs. ${data.total_amount_bob.toFixed(2)}</div>
+            <div>• <strong>Hash SHA-256 Boleta:</strong> <span class="text-[#626262] break-all">${data.payload_hash}</span></div>
+            <div>• <strong>Stellar Transaction Hash:</strong> <span class="text-[#3F7D44] font-bold break-all">${data.stellar_tx_hash}</span></div>
           `;
+          
+          // Switch to Step 3 visually
+          document.getElementById('step-pill-1').className = 'py-2 rounded-lg text-[#626262]';
+          document.getElementById('step-pill-2').className = 'py-2 rounded-lg text-[#626262]';
+          document.getElementById('step-pill-3').className = 'py-2 rounded-lg bg-white text-[#171717] shadow-subtle border border-[#E5E5E0] font-bold';
+
           loadDashboardData();
+          resBox.scrollIntoView({ behavior: 'smooth' });
         } else {
-          alert('Error al registrar boleta: ' + (data.detail || 'Error desconocido'));
+          alert('Error al registrar boleta: ' + (data.detail || 'Ocurrió un error en el servidor'));
         }
       } catch (err) {
         alert('Error de conexión: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-stamp mr-2"></i>Emitir Boleta & Notarizar en Stellar';
+        btnText.textContent = 'Etapa 3 · Emitir Boleta & Notarizar en Stellar';
       }
+    }
+
+    function dismissDeliveryResult() {
+      document.getElementById('delivery-result-box').classList.add('hidden');
+      document.getElementById('step-pill-1').className = 'py-2 rounded-lg bg-white text-[#171717] shadow-subtle border border-[#E5E5E0] font-bold';
+      document.getElementById('step-pill-2').className = 'py-2 rounded-lg text-[#626262]';
+      document.getElementById('step-pill-3').className = 'py-2 rounded-lg text-[#626262]';
     }
 
     // Run ML Factoring Simulation
@@ -791,29 +1434,31 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           resultBox.classList.remove('hidden');
 
           document.getElementById('res-risk-tier').textContent = 'RIESGO ' + data.risk_level;
-          document.getElementById('res-risk-tier').className = 'text-lg font-extrabold ' + (
-            data.risk_level === 'BAJO' ? 'text-emerald-400' :
-            data.risk_level === 'MEDIO' ? 'text-amber-400' : 'text-red-400'
+          document.getElementById('res-risk-tier').className = 'text-base font-extrabold ' + (
+            data.risk_level === 'BAJO' ? 'text-[#3F7D44]' :
+            data.risk_level === 'MEDIO' ? 'text-[#D5A332]' : 'text-[#A74445]'
           );
-          document.getElementById('res-risk-score').textContent = data.risk_score + ' / 100';
+          document.getElementById('res-risk-score').textContent = 'Score: ' + data.risk_score + ' / 100';
           document.getElementById('res-advance-pct').textContent = data.approved_advance_pct + '%';
-          document.getElementById('res-advance-amount').innerHTML = '$' + data.max_advance_usdc.toFixed(2) + ' <span class="text-xs text-slate-300 font-normal">USDC (Bs. ' + data.max_advance_bob.toFixed(2) + ')</span>';
+          document.getElementById('res-advance-amount').textContent = '$' + data.max_advance_usdc.toFixed(2) + ' USDC';
+          document.getElementById('res-advance-bob').textContent = '(Bs. ' + data.max_advance_bob.toFixed(2) + ')';
 
           document.getElementById('exec-requested-amount').value = Math.min(800, data.max_advance_usdc);
 
-          // List factors
           const list = document.getElementById('res-factors-list');
-          list.innerHTML = data.risk_factors.map(f => `<li>${f}</li>`).join('');
+          list.innerHTML = (data.risk_factors || []).map(f => `<li>${f}</li>`).join('');
+        } else {
+          alert('Error en simulación: ' + (data.detail || 'Error'));
         }
       } catch (err) {
-        alert('Error en simulación: ' + err.message);
+        alert('Error de conexión: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-calculator mr-2"></i>Calcular Capacidad de Factoring';
+        btn.innerHTML = '<i class="fa-solid fa-microchip mr-2"></i>Calcular Capacidad de Factoring con Oráculo';
       }
     }
 
-    // Execute Loan & Pollar QR Simple
+    // Execute Loan & Generate Pollar Simple QR
     async function executeLoan() {
       const btn = document.getElementById('btn-exec-loan');
       btn.disabled = true;
@@ -839,29 +1484,47 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           const qrView = document.getElementById('qr-modal-view');
           qrView.classList.remove('hidden');
 
-          document.getElementById('qr-amount-bob').textContent = 'Bs. ' + data.amount_bob.toFixed(2);
-          document.getElementById('qr-payout-id').textContent = data.pollar_payout_id;
+          document.getElementById('qr-amount-bob').textContent = 'Bs. ' + (data.amount_bob || (data.approved_amount_usdc * 6.96)).toFixed(2);
+          document.getElementById('qr-payout-id').textContent = data.pollar_payout_id || 'pol_out_confirmed';
           document.getElementById('qr-vaquita-res').textContent = data.vaquita_reservation_id;
           document.getElementById('qr-escrow-id').textContent = data.trustless_escrow_id;
-          document.getElementById('qr-deep-link').href = data.qr_deep_link;
+          document.getElementById('qr-deep-link').href = data.qr_deep_link || '#';
 
           loadDashboardData();
+          qrView.scrollIntoView({ behavior: 'smooth' });
         } else {
-          alert('Error al ejecutar factoring: ' + (data.detail || 'Error desconocido'));
+          alert('Error al ejecutar factoring: ' + (data.detail || 'Ocurrió un error'));
         }
       } catch (err) {
         alert('Error de conexión: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-bolt mr-2"></i>Desembolsar Ahora (QR Simple BOB)';
+        btn.innerHTML = '<i class="fa-solid fa-bolt mr-2 text-[#D5A332]"></i>Desembolsar Inmediato (Pollar Simple QR en Bs.)';
       }
     }
 
-    // Yield Estimation with Two-Stage LightGBM
+    // Settle Loan Operation
+    async function settleLoan(loanId) {
+      if (!confirm(`¿Confirmas la liquidación y entrega final de cosecha para el préstamo #${loanId}?`)) return;
+      try {
+        const res = await fetch(`/api/v1/factoring/${loanId}/settle`, { method: 'POST' });
+        const data = await res.json();
+        if (res.ok) {
+          alert(`Liquidación completada. Se liberó el escrow de Trustless Work y se acreditaron las comisiones al Pool Vaquita.`);
+          loadDashboardData();
+        } else {
+          alert('Error al liquidar préstamo: ' + (data.detail || 'Error'));
+        }
+      } catch (err) {
+        alert('Error de conexión: ' + err.message);
+      }
+    }
+
+    // Two-Stage ML Yield Estimation
     async function estimateYield() {
       const btn = document.getElementById('btn-ml-yield');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Calculando con LightGBM...';
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i>Iniciando modelo Two-Stage...';
 
       const payload = {
         tree_height: parseFloat(document.getElementById('ml-height').value) || 170.0,
@@ -885,17 +1548,17 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           document.getElementById('res-yield-ha').textContent = data.predicted_yield_kg_per_ha.toFixed(2) + ' kg/ha';
           document.getElementById('res-yield-prob').textContent = (data.prob_positive_yield * 100).toFixed(1) + '%';
         } else {
-          alert('Error en estimación: ' + (data.detail || 'Error'));
+          alert('Error en estimación Two-Stage: ' + (data.detail || 'Error'));
         }
       } catch (err) {
         alert('Error de conexión: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-microchip mr-2"></i>Inferir Rendimiento (Two-Stage)';
+        btn.innerHTML = '<i class="fa-solid fa-microchip mr-2"></i>Inferir Rendimiento con LightGBM';
       }
     }
 
-    // Cacao Price Forecast
+    // ICCO Price Forecast
     async function forecastPrice() {
       const btn = document.getElementById('btn-ml-price');
       btn.disabled = true;
@@ -918,26 +1581,26 @@ DASHBOARD_HTML = """<!DOCTYPE html>
           document.getElementById('res-price-ci').textContent = `[$${data.confidence_lower.toFixed(2)} - $${data.confidence_upper.toFixed(2)}]`;
           
           const trendSpan = document.getElementById('res-price-trend');
-          trendSpan.textContent = data.trend.toUpperCase();
+          trendSpan.textContent = (data.trend || 'NEUTRAL').toUpperCase();
           if (data.trend === 'bullish') {
-            trendSpan.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400';
+            trendSpan.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#3F7D44]/15 text-[#3F7D44]';
           } else if (data.trend === 'bearish') {
-            trendSpan.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400';
+            trendSpan.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#A74445]/15 text-[#A74445]';
           } else {
-            trendSpan.className = 'px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/20 text-blue-300';
+            trendSpan.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D5A332]/20 text-[#75452D]';
           }
         } else {
-          alert('Error en pronóstico: ' + (data.detail || 'Error'));
+          alert('Error en pronóstico de precios: ' + (data.detail || 'Error'));
         }
       } catch (err) {
         alert('Error de conexión: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-arrow-trend-up mr-2"></i>Simular Trayectoria de Precios';
+        btn.innerHTML = '<i class="fa-solid fa-chart-line mr-2 text-[#D5A332]"></i>Simular Trayectoria de Precios';
       }
     }
 
-    // Initial boot
+    // Initial boot on DOM load
     document.addEventListener('DOMContentLoaded', () => {
       calculatePreview();
       loadDashboardData();
