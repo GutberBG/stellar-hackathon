@@ -79,3 +79,16 @@ async def get_dashboard(
         recent_deliveries=recent_deliveries,
         active_loans=active_loans,
     )
+
+
+@router.post("/reset-demo", summary="Reset database to clean initial demo state")
+async def reset_demo_endpoint():
+    """Restores the database to pristine initial state for clean demo recording takes."""
+    from app.infrastructure.database import engine, Base
+    from app.main import seed_initial_data
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+    await seed_initial_data()
+    return {"status": "SUCCESS", "message": "Datos de demostración reiniciados con éxito."}
+

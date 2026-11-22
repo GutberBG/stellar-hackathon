@@ -134,6 +134,13 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 
         <!-- Right System Badges & Actions -->
         <div class="flex items-center space-x-2.5">
+          <!-- Auto-Demo Action Button -->
+          <button onclick="startAutoDemo()" id="btn-auto-demo" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#C76A32] to-[#D5A332] hover:brightness-110 text-white text-xs font-extrabold shadow-sm transition flex items-center space-x-1.5 animate-pulse" title="Ejecutar demostración automática paso a paso para grabación de pantalla">
+            <i class="fa-solid fa-circle-play text-xs"></i>
+            <span class="hidden sm:inline">Auto-Demo (2m 30s)</span>
+            <span class="sm:hidden">Auto-Demo</span>
+          </button>
+
           <!-- Stellar Ledger Badge -->
           <div class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#3F7D44]/10 text-[#3F7D44] border border-[#3F7D44]/20" title="Conectado al libro contable de Stellar Testnet">
             <span class="w-2 h-2 rounded-full bg-[#3F7D44] animate-pulse"></span>
@@ -208,13 +215,17 @@ DASHBOARD_HTML = """<!DOCTYPE html>
               Tu producción, tus registros y tus oportunidades en un solo lugar. Conectando la Central de Cooperativas El Ceibo, Palos Blancos y Sapecho con acopio transparente, trazabilidad EUDR y liquidez agrícola en Stellar.
             </p>
             <div class="flex flex-wrap gap-2.5 pt-2">
-              <button onclick="switchTab('deliveries')" class="px-4 py-2 rounded-xl bg-[#C76A32] hover:bg-[#B25A25] text-white text-xs font-bold shadow-sm transition flex items-center space-x-2">
+              <button onclick="startAutoDemo()" class="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C76A32] to-[#D5A332] hover:brightness-110 text-white text-xs font-extrabold shadow-md transition flex items-center space-x-2">
+                <i class="fa-solid fa-play"></i>
+                <span>▶ Iniciar Demo Guiada Automática (2m 30s)</span>
+              </button>
+              <button onclick="switchTab('deliveries')" class="px-4 py-2 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-bold shadow-sm transition flex items-center space-x-2">
                 <i class="fa-solid fa-plus"></i>
-                <span>Registrar Boleta de Acopio</span>
+                <span>Registrar Boleta</span>
               </button>
               <button onclick="switchTab('factoring')" class="px-4 py-2 rounded-xl bg-white hover:bg-[#F4F4F0] text-[#171717] border border-[#E5E5E0] text-xs font-bold transition flex items-center space-x-2">
                 <i class="fa-solid fa-calculator text-[#C76A32]"></i>
-                <span>Simular Factoring Agrícola</span>
+                <span>Simular Factoring</span>
               </button>
               <button onclick="switchTab('producers')" class="px-4 py-2 rounded-xl bg-white hover:bg-[#F4F4F0] text-[#626262] hover:text-[#171717] border border-[#E5E5E0] text-xs font-semibold transition">
                 <span>Ver Parcelas EUDR</span>
@@ -1605,7 +1616,391 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       calculatePreview();
       loadDashboardData();
     });
+
+    // ====================================================================
+    // AUTO-DEMO AUTOMATION ENGINE (Designed for Screen Recording & Pitch)
+    // ====================================================================
+    let autoDemoRunning = false;
+    let autoDemoPaused = false;
+    let autoDemoAbort = false;
+    let autoDemoNextRequested = false;
+    let countdownTimer = null;
+
+    function startAutoDemo() {
+      document.getElementById('autodemo-countdown-modal').classList.remove('hidden');
+      let count = 5;
+      document.getElementById('countdown-number').textContent = count;
+      if (countdownTimer) clearInterval(countdownTimer);
+      countdownTimer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          document.getElementById('countdown-number').textContent = count;
+        } else {
+          clearInterval(countdownTimer);
+          startAutoDemoImmediate();
+        }
+      }, 1000);
+    }
+
+    function cancelCountdown() {
+      if (countdownTimer) clearInterval(countdownTimer);
+      document.getElementById('autodemo-countdown-modal').classList.add('hidden');
+    }
+
+    function stopAutoDemo() {
+      autoDemoAbort = true;
+      autoDemoRunning = false;
+      autoDemoPaused = false;
+      document.getElementById('autodemo-teleprompter').classList.add('hidden');
+      const ptr = document.getElementById('autodemo-pointer');
+      if (ptr) ptr.classList.add('hidden');
+      document.getElementById('autodemo-countdown-modal').classList.add('hidden');
+    }
+
+    function togglePauseAutoDemo() {
+      autoDemoPaused = !autoDemoPaused;
+      const btn = document.getElementById('btn-pause-demo');
+      if (autoDemoPaused) {
+        btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i>Reanudar';
+        btn.className = 'px-2.5 py-1 rounded-lg bg-[#3F7D44] text-white font-semibold transition';
+      } else {
+        btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i>Pausar';
+        btn.className = 'px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold transition';
+      }
+    }
+
+    function skipNextAutoDemoStep() {
+      autoDemoNextRequested = true;
+    }
+
+    function sleepDemo(ms) {
+      return new Promise(resolve => {
+        const start = Date.now();
+        const interval = setInterval(() => {
+          if (autoDemoAbort || autoDemoNextRequested) {
+            clearInterval(interval);
+            autoDemoNextRequested = false;
+            resolve();
+          } else if (!autoDemoPaused) {
+            if (Date.now() - start >= ms) {
+              clearInterval(interval);
+              resolve();
+            }
+          }
+        }, 80);
+      });
+    }
+
+    function updateTeleprompter(stepNum, totalSteps, title, timeStr, text, progressPct) {
+      document.getElementById('demo-step-badge').textContent = `Paso ${stepNum} de ${totalSteps} · ${title} (${timeStr})`;
+      document.getElementById('demo-teleprompter-text').textContent = text;
+      document.getElementById('demo-progress-bar').style.width = `${progressPct}%`;
+    }
+
+    function movePointer(selectorOrEl) {
+      const el = typeof selectorOrEl === 'string' ? document.querySelector(selectorOrEl) : selectorOrEl;
+      const pointer = document.getElementById('autodemo-pointer');
+      if (!el || !pointer) return;
+      pointer.classList.remove('hidden');
+      const rect = el.getBoundingClientRect();
+      pointer.style.left = `${rect.left + rect.width / 2}px`;
+      pointer.style.top = `${rect.top + rect.height / 2}px`;
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    async function typeValue(inputSelector, targetText, duration = 800) {
+      const input = typeof inputSelector === 'string' ? document.querySelector(inputSelector) : inputSelector;
+      if (!input) return;
+      input.focus();
+      input.value = '';
+      const textStr = String(targetText);
+      const stepTime = Math.max(30, duration / textStr.length);
+      for (let i = 0; i < textStr.length; i++) {
+        if (autoDemoAbort) return;
+        input.value += textStr[i];
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+        await sleepDemo(stepTime);
+      }
+    }
+
+    async function startAutoDemoImmediate() {
+      if (countdownTimer) clearInterval(countdownTimer);
+      document.getElementById('autodemo-countdown-modal').classList.add('hidden');
+      document.getElementById('autodemo-teleprompter').classList.remove('hidden');
+
+      autoDemoRunning = true;
+      autoDemoPaused = false;
+      autoDemoAbort = false;
+      autoDemoNextRequested = false;
+
+      // 1. Reset demo state silently so all metrics start clean
+      try {
+        await fetch('/api/v1/dashboard/reset-demo', { method: 'POST' });
+        loadDashboardData();
+      } catch(e) {}
+
+      // ==========================================
+      // PASO 1: DASHBOARD & MASCOTA KAIRO (0:00 - 0:25)
+      // ==========================================
+      switchTab('dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateTeleprompter(1, 6, 'Dashboard & Mascota KAIRO', '0:00 / 02:30',
+        'Bienvenido a KAIRO 3.0: la plataforma AgriTech & FinTech construida sobre Stellar para las cooperativas cacaoteras de Alto Beni, Palos Blancos y Sapecho.',
+        8
+      );
+      movePointer('img[alt="Kairo la mascota oficial de cacao"]');
+      await sleepDemo(8000);
+      if (autoDemoAbort) return;
+
+      updateTeleprompter(1, 6, 'Dashboard · Métricas Financieras', '0:12 / 02:30',
+        'Conectamos liquidez descentralizada vía Vaquita Pool ($25,000 USDC iniciales) con acopio transparente y boletas inmutables en Stellar.',
+        16
+      );
+      movePointer('#stat-pool-avail');
+      await sleepDemo(5000);
+      if (autoDemoAbort) return;
+
+      movePointer('#recent-deliveries-body');
+      await sleepDemo(6000);
+      if (autoDemoAbort) return;
+
+      // ==========================================
+      // PASO 2: EUDR & PARCELAS GEORREFERENCIADAS (0:25 - 0:50)
+      // ==========================================
+      switchTab('producers');
+      updateTeleprompter(2, 6, 'EUDR & Trazabilidad Satelital', '0:25 / 02:30',
+        'El reglamento europeo EUDR 2023/1115 exige cero deforestación. KAIRO georreferencia cada parcela para habilitar la exportación del cacao boliviano.',
+        28
+      );
+      await sleepDemo(4000);
+      if (autoDemoAbort) return;
+
+      movePointer('#producers-grid > div:first-child');
+      updateTeleprompter(2, 6, 'Socio Mateo Mamani · El Ceibo', '0:35 / 02:30',
+        'Don Mateo Mamani en Sapecho tiene 4.5 ha certificadas (BO-LPZ-AB-ELCEIBO-001) y 96% de cumplimiento, convirtiendo su compromiso ambiental en un activo.',
+        40
+      );
+      await sleepDemo(12000);
+      if (autoDemoAbort) return;
+
+      // ==========================================
+      // PASO 3: ACOPIO & NOTARIZACIÓN STELLAR (0:50 - 01:25)
+      // ==========================================
+      switchTab('deliveries');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateTeleprompter(3, 6, 'Acopio Digital en Balanza', '0:50 / 02:30',
+        'En el centro de acopio digitalizamos el pesaje. Seleccionamos a Don Mateo: 1,000 kg de cacao en baba con 55% de humedad.',
+        48
+      );
+      movePointer('#del-producer-id');
+      document.getElementById('del-producer-id').value = '1';
+      document.getElementById('del-cacao-type').value = 'BABA';
+      await sleepDemo(3000);
+      if (autoDemoAbort) return;
+
+      movePointer('#del-gross-weight');
+      await typeValue('#del-gross-weight', '1000', 600);
+      await sleepDemo(1000);
+      if (autoDemoAbort) return;
+
+      movePointer('#del-moisture');
+      await typeValue('#del-moisture', '55.0', 600);
+      calculatePreview();
+      await sleepDemo(2000);
+      if (autoDemoAbort) return;
+
+      updateTeleprompter(3, 6, 'Cálculo Agronómico en Vivo', '01:04 / 02:30',
+        'La fórmula calcula 330 kg netos secos y una liquidación de $1,584 USDC (Bs. 11,024). Notarizamos el comprobante en Stellar.',
+        58
+      );
+      movePointer('#preview-total');
+      await sleepDemo(4000);
+      if (autoDemoAbort) return;
+
+      movePointer('#btn-submit-delivery');
+      await sleepDemo(1500);
+      document.getElementById('delivery-form').dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+
+      await sleepDemo(3000);
+      updateTeleprompter(3, 6, 'Boleta Notarizada en Stellar', '01:14 / 02:30',
+        '¡Boleta blindada! KAIRO genera el hash canónico SHA-256 grabado en el Memo Hash de Stellar, haciendo imposible alterar el pesaje o el pago.',
+        65
+      );
+      movePointer('#delivery-result-box');
+      await sleepDemo(10000);
+      if (autoDemoAbort) return;
+
+      // ==========================================
+      // PASO 4: FACTORING ML & SIMPLE QR (01:25 - 01:55)
+      // ==========================================
+      switchTab('factoring');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateTeleprompter(4, 6, 'Factoring ML & Oráculo Climático', '01:25 / 02:30',
+        'Antes de la cosecha, el productor necesita capital. El oráculo climático evalúa precipitación y humedad relativa de Alto Beni.',
+        70
+      );
+      document.getElementById('fac-rainfall').value = 160;
+      document.getElementById('fac-humidity').value = 75;
+      updateWeatherLabels();
+      movePointer('#fac-rainfall');
+      await sleepDemo(4000);
+      if (autoDemoAbort) return;
+
+      movePointer('#btn-simulate');
+      await sleepDemo(1500);
+      await runSimulation();
+
+      updateTeleprompter(4, 6, 'Cupo Pre-Aprobado & Escrow', '01:36 / 02:30',
+        'Diagnóstico: Riesgo Bajo. Pre-aprobado $3,816 USDC. Don Mateo solicita $800 para cosecha: se reserva liquidez en Vaquita y contrato Trustless Work.',
+        78
+      );
+      movePointer('#res-advance-amount');
+      await sleepDemo(5000);
+      if (autoDemoAbort) return;
+
+      movePointer('#exec-requested-amount');
+      document.getElementById('exec-requested-amount').value = '800';
+      await sleepDemo(1500);
+      if (autoDemoAbort) return;
+
+      movePointer('#btn-exec-loan');
+      await sleepDemo(1500);
+      await executeLoan();
+
+      updateTeleprompter(4, 6, 'Desembolso Simple QR en Bolivianos', '01:45 / 02:30',
+        'A través de Pollar, se emite una orden Simple QR por Bs. 5,568.00. Don Mateo cobra al instante en su banco sin lidiar con criptomonedas.',
+        84
+      );
+      movePointer('#qr-modal-view');
+      await sleepDemo(10000);
+      if (autoDemoAbort) return;
+
+      // ==========================================
+      // PASO 5: TWO-STAGE ML & PRECIOS ICCO (01:55 - 02:15)
+      // ==========================================
+      switchTab('ml-forecast');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateTeleprompter(5, 6, 'Modelo Two-Stage (LightGBM)', '01:55 / 02:30',
+        'Para mitigar el riesgo crediticio, integramos un modelo Two-Stage (LightGBM) que infiere la cosecha por biometría (53.85 kg/ha con 95.1% probabilidad).',
+        88
+      );
+      movePointer('#btn-ml-yield');
+      await sleepDemo(2000);
+      await estimateYield();
+      movePointer('#ml-yield-result');
+      await sleepDemo(6000);
+      if (autoDemoAbort) return;
+
+      updateTeleprompter(5, 6, 'Proyección Precios Internacionales ICCO', '02:05 / 02:30',
+        'Simulamos la trayectoria del mercado internacional de cacao a 30 días con bandas de confianza al 95%, protegiendo a la cooperativa de la volatilidad.',
+        94
+      );
+      movePointer('#btn-ml-price');
+      await sleepDemo(2000);
+      await forecastPrice();
+      movePointer('#ml-price-result');
+      await sleepDemo(7000);
+      if (autoDemoAbort) return;
+
+      // ==========================================
+      // PASO 6: PROGRESO & CIERRE (02:15 - 02:30)
+      // ==========================================
+      switchTab('progress');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateTeleprompter(6, 6, 'Progreso & Gamificación KAIRO', '02:15 / 02:30',
+        'Nuestra mascota KAIRO y el sistema de niveles premian las buenas prácticas agrícolas con insignias criptográficas verificables en Stellar.',
+        98
+      );
+      movePointer('img[alt="Kairo te acompaña en tu progreso"]');
+      await sleepDemo(7000);
+      if (autoDemoAbort) return;
+
+      switchTab('dashboard');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      updateTeleprompter(6, 6, 'Demostración Finalizada', '02:30 / 02:30',
+        'KAIRO une inteligencia artificial, finanzas regenerativas y la red Stellar para empoderar al productor de cacao boliviano. ¡Gracias!',
+        100
+      );
+      movePointer('#stat-deliveries-count');
+      await sleepDemo(6000);
+
+      document.getElementById('demo-step-badge').textContent = '✅ Demo Completa · ¡Detén tu grabación!';
+      document.getElementById('demo-teleprompter-text').textContent = '🎬 ¡Demostración guiada completada exitosamente! Puedes detener tu grabador de pantalla.';
+      const ptr = document.getElementById('autodemo-pointer');
+      if (ptr) ptr.classList.add('hidden');
+    }
   </script>
+
+  <!-- ==================================================================== -->
+  <!-- FLOATING AUTO-DEMO TELEPROMPTER, POINTER & COUNTDOWN MODAL OVERLAYS   -->
+  <!-- ==================================================================== -->
+
+  <!-- Floating Teleprompter Bar -->
+  <div id="autodemo-teleprompter" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-[94vw] max-w-3xl bg-[#171717]/95 backdrop-blur-md text-white rounded-2xl p-4 sm:p-5 shadow-2xl border border-white/15 space-y-2.5 transition-all duration-300">
+    <div class="flex items-center justify-between gap-2 border-b border-white/10 pb-2">
+      <div class="flex items-center space-x-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-[#C76A32] animate-pulse"></span>
+        <span id="demo-step-badge" class="px-2.5 py-0.5 rounded-full bg-white/10 text-white text-[11px] font-bold">
+          Paso 1 de 6 · Dashboard (0:00 / 02:30)
+        </span>
+      </div>
+      <div class="flex items-center space-x-1.5 text-xs">
+        <button onclick="togglePauseAutoDemo()" id="btn-pause-demo" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold transition flex items-center space-x-1">
+          <i class="fa-solid fa-pause text-[10px]"></i>
+          <span>Pausar</span>
+        </button>
+        <button onclick="skipNextAutoDemoStep()" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-semibold transition flex items-center space-x-1">
+          <i class="fa-solid fa-forward-step text-[10px]"></i>
+          <span>Saltar</span>
+        </button>
+        <button onclick="stopAutoDemo()" class="px-2.5 py-1 rounded-lg bg-[#A74445]/30 text-red-300 hover:bg-[#A74445]/50 font-semibold transition flex items-center space-x-1">
+          <i class="fa-solid fa-stop text-[10px]"></i>
+          <span>Detener</span>
+        </button>
+      </div>
+    </div>
+    <div class="text-xs sm:text-sm font-medium text-white/95 leading-relaxed min-h-[42px] flex items-center" id="demo-teleprompter-text">
+      Iniciando demostración guiada...
+    </div>
+    <div class="w-full bg-white/10 h-1.5 rounded-full overflow-hidden">
+      <div id="demo-progress-bar" class="bg-gradient-to-r from-[#C76A32] via-[#D5A332] to-[#3F7D44] h-full w-0 transition-all duration-300"></div>
+    </div>
+  </div>
+
+  <!-- Virtual Laser Spotlight Pointer -->
+  <div id="autodemo-pointer" class="hidden fixed pointer-events-none z-50 w-8 h-8 rounded-full border-2 border-[#C76A32] bg-[#C76A32]/40 shadow-lg transform -translate-x-1/2 -translate-y-1/2 transition-all duration-700 ease-out flex items-center justify-center">
+    <div class="w-2.5 h-2.5 rounded-full bg-white shadow-sm animate-ping"></div>
+  </div>
+
+  <!-- Countdown Modal Overlay -->
+  <div id="autodemo-countdown-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full text-center space-y-4 shadow-2xl border border-[#E5E5E0]">
+      <div class="w-20 h-20 mx-auto">
+        <img src="/static/kairo-mascot-transparent.png" alt="Kairo" class="w-full h-full object-contain mascot-shadow" onerror="this.src='/kairo-mascot-transparent.png'">
+      </div>
+      <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-[#C76A32]/10 text-[#C76A32] text-xs font-bold">
+        <i class="fa-solid fa-video"></i>
+        <span>Modo Grabación de Demostración</span>
+      </div>
+      <h3 class="text-xl font-display font-extrabold text-[#171717]">¡Prepara tu Grabador de Pantalla!</h3>
+      <p class="text-xs text-[#626262]">
+        Inicia tu grabación (QuickTime, OBS o atajo de pantalla). El sistema conducirá la plataforma automáticamente por los 6 módulos mostrando el valor de Stellar.
+      </p>
+      <div class="text-6xl font-black text-[#C76A32] font-mono py-2" id="countdown-number">
+        5
+      </div>
+      <div class="flex justify-center space-x-3 pt-2">
+        <button onclick="startAutoDemoImmediate()" class="px-4 py-2 rounded-xl bg-[#171717] hover:bg-black text-white text-xs font-bold transition">
+          Empezar Ahora Mismo
+        </button>
+        <button onclick="cancelCountdown()" class="px-4 py-2 rounded-xl bg-white border border-[#E5E5E0] text-xs font-semibold text-[#626262] hover:bg-[#F4F4F0] transition">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
 """
