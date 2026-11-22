@@ -1,7 +1,9 @@
 """FastAPI dependency injection providers following Hexagonal Architecture."""
+import os
 from typing import AsyncGenerator
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.config import settings
 from app.infrastructure.database import get_db
 from app.infrastructure.repositories import (
     ProducerRepository,
@@ -14,6 +16,7 @@ from app.domain.ports.pollar_port import PollarPort
 from app.domain.ports.vaquita_port import VaquitaPort
 from app.domain.ports.trustless_port import TrustlessPort
 from app.infrastructure.adapters.mock_stellar import MockStellarAdapter
+from app.infrastructure.adapters.real_stellar import RealStellarAdapter
 from app.infrastructure.adapters.mock_pollar import MockPollarAdapter
 from app.infrastructure.adapters.mock_vaquita import MockVaquitaAdapter
 from app.infrastructure.adapters.mock_trustless import MockTrustlessAdapter
@@ -50,7 +53,16 @@ def get_pool_repo(db: AsyncSession = Depends(get_db)) -> PoolRepository:
 
 # Hexagonal Adapters (Swappable for real SDKs)
 def get_stellar_adapter() -> StellarPort:
-    # Future swap: return RealStellarAdapter()
+    if (
+        settings.STELLAR_USE_REAL_NETWORK
+        and settings.STELLAR_SECRET_KEY
+        and os.getenv("PYTEST_CURRENT_TEST") is None
+    ):
+        return RealStellarAdapter(
+            secret_key=settings.STELLAR_SECRET_KEY,
+            horizon_url=settings.STELLAR_HORIZON_URL,
+            network=settings.STELLAR_NETWORK,
+        )
     return MockStellarAdapter()
 
 

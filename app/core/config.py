@@ -28,9 +28,11 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = ["*"]
 
     # External Integration Mocks / Configs
+    STELLAR_USE_REAL_NETWORK: bool = True
     STELLAR_NETWORK: str = "TESTNET"
     STELLAR_HORIZON_URL: str = "https://horizon-testnet.stellar.org"
     STELLAR_ISSUING_ACCOUNT: str = "GBMOCKSTELLARAYNICACAO7777777777777777777777777777777777"
+    STELLAR_SECRET_KEY: str = ""
     POLLAR_API_BASE_URL: str = "https://sandbox.pollar.io/v1"
     VAQUITA_POOL_ID: str = "pool_vaquita_altobeni_01"
     TRUSTLESS_WORK_ESCROW_FACTORY: str = "CBHMOCKTRUSTLESSWORKESCROWCONTRACT0000000000000000000000"
