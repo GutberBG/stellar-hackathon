@@ -16,6 +16,7 @@ from app.api.v1.dependencies import (
     get_vaquita_adapter,
     get_trustless_adapter,
     get_pollar_adapter,
+    get_stellar_adapter,
     get_risk_engine,
     get_settlement_service,
 )
@@ -23,6 +24,7 @@ from app.infrastructure.repositories import ProducerRepository, LoanRepository
 from app.domain.ports.vaquita_port import VaquitaPort
 from app.domain.ports.trustless_port import TrustlessPort
 from app.domain.ports.pollar_port import PollarPort
+from app.domain.ports.stellar_port import StellarPort
 from app.ml.risk_engine import RiskEngine
 from app.domain.services import SettlementCalculationService
 from app.infrastructure.orm_models import AdvanceLoanORM
@@ -104,6 +106,7 @@ async def execute_factoring(
     vaquita_port: VaquitaPort = Depends(get_vaquita_adapter),
     trustless_port: TrustlessPort = Depends(get_trustless_adapter),
     pollar_port: PollarPort = Depends(get_pollar_adapter),
+    stellar_port: StellarPort = Depends(get_stellar_adapter),
     risk_engine: RiskEngine = Depends(get_risk_engine),
 ) -> FactoringExecuteResponse:
     """
@@ -183,6 +186,20 @@ async def execute_factoring(
         concept=f"Adelanto Factoring Cacao {loan_code}",
     )
 
+    # Step 3b: Optional real Stellar Testnet transfer to connected Pollar wallet
+    stellar_tx_hash: Optional[str] = None
+    if req.pollar_wallet_address:
+        try:
+            demo_xlm = round(min(max(approved_amount_usdc / 100.0, 2.0), 50.0), 2)
+            tx_res = await stellar_port.transfer_usdc(
+                destination_account=req.pollar_wallet_address,
+                amount_usdc=demo_xlm,
+                memo=loan_code,
+            )
+            stellar_tx_hash = tx_res.get("tx_hash")
+        except Exception:
+            stellar_tx_hash = None
+
     # Step 4: Persist in Database
     loan_orm = AdvanceLoanORM(
         loan_code=loan_code,
@@ -216,6 +233,7 @@ async def execute_factoring(
         pollar_payout_id=saved_loan.pollar_payout_id,
         pollar_qr_payload=saved_loan.pollar_qr_payload,
         qr_deep_link=pollar_payout["qr_deep_link"],
+        stellar_tx_hash=stellar_tx_hash,
         created_at=saved_loan.created_at,
     )
 
