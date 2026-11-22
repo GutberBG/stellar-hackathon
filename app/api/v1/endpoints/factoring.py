@@ -1,7 +1,7 @@
 """Factoring & AI Oracle API endpoints."""
 import time
 from datetime import datetime, timezone
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, status
 from app.api.v1.schemas import (
     FactoringSimulateRequest,
@@ -34,6 +34,29 @@ from app.core.config import settings
 router = APIRouter()
 
 
+def _get_biometric_features(req, producer) -> dict:
+    """Extract biometric features from request, falling back to producer defaults."""
+    return {
+        "tree_height": req.tree_height or getattr(producer, 'tree_height', 170.0),
+        "diameter": req.diameter or getattr(producer, 'diameter', 8.0),
+        "crown_radius_group": req.crown_radius_group or getattr(producer, 'crown_radius_group', 90.0),
+        "leaf_count": req.leaf_count or getattr(producer, 'leaf_count', 260.0),
+        "cherelle": req.cherelle or getattr(producer, 'cherelle', 0.3),
+        "flowering_assessment": req.flowering_assessment or getattr(producer, 'flowering_assessment', 1.0),
+        "leaf_flush": req.leaf_flush or getattr(producer, 'leaf_flush', 1.6),
+        "crown_radius_1": req.crown_radius_1 or getattr(producer, 'crown_radius_1', 90.0),
+        "crown_radius_2": req.crown_radius_2 or getattr(producer, 'crown_radius_2', 90.0),
+        "crown_radius_3": req.crown_radius_3 or getattr(producer, 'crown_radius_3', 90.0),
+        "crown_radius_4": req.crown_radius_4 or getattr(producer, 'crown_radius_4', 90.0),
+        "crown_depth": req.crown_depth or getattr(producer, 'crown_depth', 4.0),
+        "single_trunk_circumference": req.single_trunk_circumference or getattr(producer, 'single_trunk_circumference', 30.0),
+        "n_trees": req.n_trees or getattr(producer, 'n_trees', 1111),
+        "variedad": req.variedad or getattr(producer, 'variedad', "Nacional"),
+        "fert_level": req.fert_level or getattr(producer, 'fert_level', "100%"),
+        "hectares": getattr(producer, 'hectares', 2.0),
+    }
+
+
 @router.post(
     "/simulate",
     response_model=FactoringSimulateResponse,
@@ -45,9 +68,8 @@ async def simulate_factoring(
     risk_engine: RiskEngine = Depends(get_risk_engine),
 ) -> FactoringSimulateResponse:
     """
-    Simulates credit factoring for a cacao farmer using the RandomForest Risk Engine.
-    Considers historical deliveries, compliance score, quality record, and real-time microclimate
-    (precipitation in mm and relative humidity %).
+    Simulates credit factoring for a cacao farmer using the Two-Stage ML Risk Engine.
+    Predicts yield from biometric features and forecasts cacao price for expected revenue.
     """
     producer = await producer_repo.get_by_id(req.producer_id)
     if not producer:
@@ -65,24 +87,31 @@ async def simulate_factoring(
 
     compliance_rate = producer.compliance_score
 
-    # ML Risk Inference
+    # Get biometric features (from request or producer defaults)
+    biometric = _get_biometric_features(req, producer)
+
+    # ML Risk Inference with Two-Stage Model yield prediction + Price Forecast
     ml_result = risk_engine.predict(
         historical_yield_kg=historical_yield_kg,
         compliance_rate=compliance_rate,
         quality_score=quality_score,
         rainfall_mm=req.rainfall_mm,
         humidity_pct=req.humidity_pct,
-        expected_harvest_kg=req.expected_harvest_kg,
-        base_price_usdc=settings.BASE_CACAO_PRICE_USDC_PER_KG,
+        expected_harvest_kg=req.expected_harvest_kg,  # Optional - will be predicted from biometrics
+        base_price_usdc=None,  # Will use price forecast
         exchange_rate_bob=settings.EXCHANGE_RATE_USDC_BOB,
+        **biometric,
     )
+
+    # Use ML-predicted harvest if not provided
+    expected_harvest = req.expected_harvest_kg or ml_result["expected_harvest_kg"]
 
     return FactoringSimulateResponse(
         producer_id=producer.id,
         producer_name=producer.name,
         community=producer.community,
         cooperative=producer.cooperative,
-        expected_harvest_kg=req.expected_harvest_kg,
+        expected_harvest_kg=expected_harvest,
         risk_score=ml_result["risk_score"],
         risk_level=ml_result["risk_level"],
         approved_advance_pct=ml_result["approved_advance_pct"],
@@ -90,6 +119,11 @@ async def simulate_factoring(
         max_advance_usdc=ml_result["max_advance_usdc"],
         max_advance_bob=ml_result["max_advance_bob"],
         risk_factors=ml_result["risk_factors"],
+        predicted_yield_kg_per_ha=ml_result.get("predicted_yield_kg_per_ha"),
+        predicted_yield_g_per_tree=ml_result.get("predicted_yield_g_per_tree"),
+        prob_positive_yield=ml_result.get("prob_positive_yield"),
+        forecast_price_usdc_per_kg=ml_result.get("forecast_price_usdc_per_kg"),
+        price_trend=ml_result.get("price_trend"),
     )
 
 
@@ -111,7 +145,7 @@ async def execute_factoring(
 ) -> FactoringExecuteResponse:
     """
     Executes an approved factoring advance:
-    1. Validates credit capacity with ML risk engine.
+    1. Validates credit capacity with ML risk engine (Two-Stage yield + Price forecast).
     2. Reserves liquidity in Vaquita Pool.
     3. Deploys/Registers milestone escrow via Trustless Work.
     4. Disburses Bolivianos via Pollar Simple QR.
@@ -131,16 +165,23 @@ async def execute_factoring(
         historical_yield_kg = 900.0
         quality_score = 0.85
 
+    # Get biometric features
+    biometric = _get_biometric_features(req, producer)
+
     ml_result = risk_engine.predict(
         historical_yield_kg=historical_yield_kg,
         compliance_rate=producer.compliance_score,
         quality_score=quality_score,
         rainfall_mm=req.rainfall_mm,
         humidity_pct=req.humidity_pct,
-        expected_harvest_kg=req.expected_harvest_kg,
-        base_price_usdc=settings.BASE_CACAO_PRICE_USDC_PER_KG,
+        expected_harvest_kg=req.expected_harvest_kg,  # Optional - predicted from biometrics
+        base_price_usdc=None,  # Will use price forecast
         exchange_rate_bob=settings.EXCHANGE_RATE_USDC_BOB,
+        **biometric,
     )
+
+    # Use ML-predicted harvest if not provided
+    expected_harvest = req.expected_harvest_kg or ml_result["expected_harvest_kg"]
 
     if req.requested_amount_usdc > ml_result["max_advance_usdc"]:
         raise FactoringValidationException(

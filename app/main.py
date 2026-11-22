@@ -92,6 +92,9 @@ async def seed_initial_data() -> None:
                 bank_account_hint="1000002938491 (Banco Unión - QR Simple)",
                 compliance_score=0.96,
                 risk_tier="BAJO",
+                hectares=3.2,
+                tree_age_years=12,
+                altitude_m=520.0,
             ),
             ProducerORM(
                 name="Elena Quispe Condori",
@@ -107,6 +110,9 @@ async def seed_initial_data() -> None:
                 bank_account_hint="2000008891234 (Banco Bisa - QR Simple)",
                 compliance_score=0.78,
                 risk_tier="MEDIO",
+                hectares=2.4,
+                tree_age_years=8,
+                altitude_m=480.0,
             ),
             ProducerORM(
                 name="Carlos Condori Mamani",
@@ -122,6 +128,9 @@ async def seed_initial_data() -> None:
                 bank_account_hint="3000004567890 (Banco Mercantil - QR Simple)",
                 compliance_score=0.55,
                 risk_tier="ALTO",
+                hectares=1.5,
+                tree_age_years=4,
+                altitude_m=430.0,
             ),
         ]
 
@@ -291,9 +300,19 @@ async def root():
 
 @app.get("/health", tags=["Health"])
 async def health_check():
+    # Check ML model
+    ml_loaded = False
+    try:
+        from app.api.v1.dependencies import get_risk_engine
+        engine = get_risk_engine()
+        ml_loaded = engine.model is not None
+    except Exception:
+        ml_loaded = False
+
     return {
-        "status": "healthy",
+        "status": "healthy" if ml_loaded else "degraded",
         "database": "connected",
+        "ml_model_loaded": ml_loaded,
         "stellar_network": settings.STELLAR_NETWORK,
         "exchange_rate_bob": settings.EXCHANGE_RATE_USDC_BOB,
         "vaquita_pool_id": settings.VAQUITA_POOL_ID,

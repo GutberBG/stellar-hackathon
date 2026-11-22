@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite+aiosqlite:///./ayni_cacao.db"
 
     # ML Model
-    ML_MODEL_PATH: str = "./ayni_risk_model.joblib"
+    ML_MODEL_PATH: str = "./app/ml/best_two_stage_model.pkl"
 
     # CORS
     CORS_ORIGINS: List[str] = ["*"]

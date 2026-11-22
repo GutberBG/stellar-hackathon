@@ -66,6 +66,9 @@ class ProducerDomain(BaseModel):
     bank_account_hint: str = "Bisa / Simple QR"
     compliance_score: float = 0.90
     risk_tier: RiskLevel = RiskLevel.BAJO
+    hectares: float = 2.0
+    tree_age_years: int = 8
+    altitude_m: float = 500.0
     created_at: Optional[datetime] = None
 
 

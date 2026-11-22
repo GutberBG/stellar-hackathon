@@ -38,6 +38,9 @@ class ProducerORM(Base):
     bank_account_hint = Column(String(100), default="Bisa / Simple QR", nullable=False)
     compliance_score = Column(Float, default=0.90, nullable=False)
     risk_tier = Column(String(20), default="BAJO", nullable=False)
+    hectares = Column(Float, default=2.0, nullable=False)
+    tree_age_years = Column(Integer, default=8, nullable=False)
+    altitude_m = Column(Float, default=500.0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
     user = relationship("UserORM", back_populates="producer")
