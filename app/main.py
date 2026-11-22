@@ -249,9 +249,19 @@ async def root():
 
 @app.get("/health", tags=["Health"])
 async def health_check():
+    # Check ML model
+    ml_loaded = False
+    try:
+        from app.api.v1.dependencies import get_risk_engine
+        engine = get_risk_engine()
+        ml_loaded = engine.model is not None
+    except Exception:
+        ml_loaded = False
+
     return {
-        "status": "healthy",
+        "status": "healthy" if ml_loaded else "degraded",
         "database": "connected",
+        "ml_model_loaded": ml_loaded,
         "stellar_network": settings.STELLAR_NETWORK,
         "exchange_rate_bob": settings.EXCHANGE_RATE_USDC_BOB,
         "vaquita_pool_id": settings.VAQUITA_POOL_ID,
