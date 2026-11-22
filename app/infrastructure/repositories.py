@@ -4,8 +4,36 @@ from typing import List, Optional, Tuple
 from sqlalchemy import select, func, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
-from app.infrastructure.orm_models import ProducerORM, HarvestDeliveryORM, AdvanceLoanORM, VaquitaPoolORM
+from app.infrastructure.orm_models import UserORM, ProducerORM, HarvestDeliveryORM, AdvanceLoanORM, VaquitaPoolORM
 from app.core.exceptions import EntityNotFoundException, InsufficientLiquidityException
+
+
+class UserRepository:
+    def __init__(self, session: AsyncSession):
+        self.session = session
+
+    async def get_by_id(self, user_id: int) -> Optional[UserORM]:
+        result = await self.session.execute(
+            select(UserORM).options(selectinload(UserORM.producer)).where(UserORM.id == user_id)
+        )
+        return result.scalar_one_or_none()
+
+    async def get_by_email(self, email: str) -> Optional[UserORM]:
+        result = await self.session.execute(
+            select(UserORM).options(selectinload(UserORM.producer)).where(UserORM.email == email)
+        )
+        return result.scalar_one_or_none()
+
+    async def create(self, user: UserORM) -> UserORM:
+        self.session.add(user)
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user
+
+    async def update(self, user: UserORM) -> UserORM:
+        await self.session.commit()
+        await self.session.refresh(user)
+        return user
 
 
 class ProducerRepository:
@@ -26,11 +54,32 @@ class ProducerRepository:
         )
         return result.scalar_one_or_none()
 
+    async def get_by_user_id(self, user_id: int) -> Optional[ProducerORM]:
+        result = await self.session.execute(
+            select(ProducerORM)
+            .options(selectinload(ProducerORM.deliveries), selectinload(ProducerORM.loans))
+            .where(ProducerORM.user_id == user_id)
+        )
+        return result.scalar_one_or_none()
+
     async def create(self, producer: ProducerORM) -> ProducerORM:
         self.session.add(producer)
         await self.session.commit()
         await self.session.refresh(producer)
         return producer
+
+    async def update(self, producer: ProducerORM) -> ProducerORM:
+        await self.session.commit()
+        await self.session.refresh(producer)
+        return producer
+
+    async def get_loans(self, producer_id: int) -> List[AdvanceLoanORM]:
+        result = await self.session.execute(
+            select(AdvanceLoanORM)
+            .where(AdvanceLoanORM.producer_id == producer_id)
+            .order_by(desc(AdvanceLoanORM.created_at))
+        )
+        return list(result.scalars().all())
 
     async def count(self) -> int:
         result = await self.session.execute(select(func.count(ProducerORM.id)))
@@ -163,6 +212,7 @@ class PoolRepository:
                 id=pool_id,
                 total_liquidity_usdc=initial_liquidity,
                 reserved_liquidity_usdc=0.0,
+                available_liquidity_usdc=initial_liquidity,
             )
             self.session.add(pool)
             await self.session.commit()
@@ -179,6 +229,7 @@ class PoolRepository:
             raise InsufficientLiquidityException(requested=amount_usdc, available=available)
 
         pool.reserved_liquidity_usdc = round(pool.reserved_liquidity_usdc + amount_usdc, 2)
+        pool.available_liquidity_usdc = round(pool.total_liquidity_usdc - pool.reserved_liquidity_usdc, 2)
         await self.session.commit()
         await self.session.refresh(pool)
         return pool
@@ -195,6 +246,7 @@ class PoolRepository:
 
         pool.reserved_liquidity_usdc = max(0.0, round(pool.reserved_liquidity_usdc - principal_usdc, 2))
         pool.total_liquidity_usdc = round(pool.total_liquidity_usdc + yield_usdc, 2)
+        pool.available_liquidity_usdc = round(pool.total_liquidity_usdc - pool.reserved_liquidity_usdc, 2)
         await self.session.commit()
         await self.session.refresh(pool)
         return pool

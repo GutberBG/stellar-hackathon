@@ -10,6 +10,7 @@ from app.infrastructure.repositories import (
     DeliveryRepository,
     LoanRepository,
     PoolRepository,
+    UserRepository,
 )
 from app.domain.ports.stellar_port import StellarPort
 from app.domain.ports.pollar_port import PollarPort
@@ -49,6 +50,10 @@ def get_loan_repo(db: AsyncSession = Depends(get_db)) -> LoanRepository:
 
 def get_pool_repo(db: AsyncSession = Depends(get_db)) -> PoolRepository:
     return PoolRepository(db)
+
+
+def get_user_repo(db: AsyncSession = Depends(get_db)) -> UserRepository:
+    return UserRepository(db)
 
 
 # Hexagonal Adapters (Swappable for real SDKs)

@@ -5,6 +5,12 @@ from typing import Optional, List
 from pydantic import BaseModel, Field
 
 
+class UserRole(str, Enum):
+    PRODUCTOR = "PRODUCTOR"
+    ACOPIADOR = "ACOPIADOR"
+    LIQUIDEZ = "LIQUIDEZ"
+
+
 class CacaoType(str, Enum):
     BABA = "BABA"
     SECO = "SECO"
@@ -34,15 +40,30 @@ class DeliveryStatus(str, Enum):
     NOTARIZED = "NOTARIZED"
 
 
+class UserDomain(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: UserRole
+    pollar_wallet_address: Optional[str] = None
+    is_active: bool = True
+    created_at: Optional[datetime] = None
+
+
 class ProducerDomain(BaseModel):
     id: int
+    user_id: Optional[int] = None
     name: str
+    ci_number: Optional[str] = None
     community: str
     cooperative: str
     eudr_latitude: float
     eudr_longitude: float
     eudr_plot_code: str
+    parcel_hectares: float = 2.5
+    eudr_certified: bool = True
     phone: str
+    bank_account_hint: str = "Bisa / Simple QR"
     compliance_score: float = 0.90
     risk_tier: RiskLevel = RiskLevel.BAJO
     created_at: Optional[datetime] = None

@@ -2,7 +2,43 @@
 from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel, Field, ConfigDict
-from app.domain.models import CacaoType, QualityGrade, RiskLevel, LoanStatus, DeliveryStatus
+from app.domain.models import CacaoType, QualityGrade, RiskLevel, LoanStatus, DeliveryStatus, UserRole
+
+
+# --- USER & AUTH SCHEMAS ---
+class UserRegisterRequest(BaseModel):
+    email: str
+    password: str
+    full_name: str
+    role: UserRole = UserRole.PRODUCTOR
+    ci_number: Optional[str] = None
+    community: Optional[str] = "Sapecho (Alto Beni)"
+    cooperative: Optional[str] = "Central de Cooperativas El Ceibo"
+    phone: Optional[str] = "+59171234567"
+    parcel_hectares: float = 2.5
+
+
+class UserLoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class PollarOAuthRequest(BaseModel):
+    email: str
+    full_name: str
+    role: UserRole = UserRole.PRODUCTOR
+    provider: str = "google"
+
+
+class UserResponse(BaseModel):
+    id: int
+    email: str
+    full_name: str
+    role: UserRole
+    pollar_wallet_address: Optional[str] = None
+    is_active: bool = True
+    created_at: datetime
+    model_config = ConfigDict(from_attributes=True)
 
 
 # --- PRODUCER SCHEMAS ---
@@ -16,6 +52,41 @@ class ProducerBase(BaseModel):
     phone: str
     compliance_score: float = 0.90
     risk_tier: RiskLevel = RiskLevel.BAJO
+    user_id: Optional[int] = None
+    ci_number: Optional[str] = None
+    parcel_hectares: float = 2.5
+    eudr_certified: bool = True
+    bank_account_hint: str = "Bisa / Simple QR"
+
+
+class ProducerCreateRequest(BaseModel):
+    name: str
+    community: str = "Sapecho (Alto Beni)"
+    cooperative: str = "Central de Cooperativas El Ceibo"
+    phone: str = "+59171234567"
+    ci_number: Optional[str] = None
+    eudr_latitude: float = -15.5412
+    eudr_longitude: float = -67.3298
+    eudr_plot_code: Optional[str] = None
+    parcel_hectares: float = 2.5
+    bank_account_hint: str = "Bisa / Simple QR"
+
+
+class ProducerUpdateRequest(BaseModel):
+    name: Optional[str] = None
+    community: Optional[str] = None
+    phone: Optional[str] = None
+    bank_account_hint: Optional[str] = None
+    eudr_latitude: Optional[float] = None
+    eudr_longitude: Optional[float] = None
+    parcel_hectares: Optional[float] = None
+
+
+class AuthTokenResponse(BaseModel):
+    access_token: str
+    token_type: str = "bearer"
+    user: UserResponse
+    producer: Optional[ProducerBase] = None
 
 
 class ProducerResponse(ProducerBase):

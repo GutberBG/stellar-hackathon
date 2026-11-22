@@ -11,6 +11,17 @@ class PollarPort(ABC):
     """
 
     @abstractmethod
+    async def create_invisible_wallet(
+        self,
+        email: str,
+        full_name: str,
+    ) -> Dict[str, Any]:
+        """
+        Creates an embedded invisible Stellar wallet for the user via Pollar Auth.
+        """
+        pass
+
+    @abstractmethod
     async def disburse_to_qr(
         self,
         producer_id: int,

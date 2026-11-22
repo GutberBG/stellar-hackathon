@@ -15,6 +15,26 @@ class MockPollarAdapter(PollarPort):
     # response = await httpx.post(f"{settings.POLLAR_API_BASE_URL}/disbursements/qr", json=...)
     """
 
+    async def create_invisible_wallet(
+        self,
+        email: str,
+        full_name: str,
+    ) -> Dict[str, Any]:
+        """
+        Simulates generation of an invisible self-custody wallet for the user via Pollar.
+        # TODO: Integrar SDK real de Pollar Auth
+        """
+        seed = f"POLLAR_WALLET:{email}"
+        pubkey = "G" + hashlib.sha256(seed.encode()).hexdigest().upper()[:55]
+        pollar_user_id = "usr_" + hashlib.sha256(seed.encode()).hexdigest()[:16]
+        return {
+            "pollar_user_id": pollar_user_id,
+            "stellar_address": pubkey,
+            "email": email,
+            "full_name": full_name,
+            "status": "ACTIVATED",
+        }
+
     async def disburse_to_qr(
         self,
         producer_id: int,
@@ -47,7 +67,7 @@ class MockPollarAdapter(PollarPort):
             "payout_channel": "SIMPLE_QR_BOLIVIA",
             "destination_phone": producer_phone,
             "qr_payload": qr_payload,
-            "qr_deep_link": f"https://qr.pollar.io/pay/{payout_id}",
+            "qr_deep_link": f"https://qr.pollar.xyz/pay/{payout_id}",
             "expires_at_seconds": 86400,
             "created_at": timestamp,
         }

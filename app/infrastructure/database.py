@@ -21,10 +21,28 @@ AsyncSessionLocal = async_sessionmaker(
 Base = declarative_base()
 
 
+def _sync_sqlite_columns(sync_conn) -> None:
+    """Auto-migrates missing columns on existing SQLite tables during development."""
+    from sqlalchemy import inspect, text
+    inspector = inspect(sync_conn)
+    existing_tables = set(inspector.get_table_names())
+    for table_name, table in Base.metadata.tables.items():
+        if table_name in existing_tables:
+            existing_cols = {col["name"] for col in inspector.get_columns(table_name)}
+            for col in table.columns:
+                if col.name not in existing_cols:
+                    col_type = col.type.compile(sync_conn.dialect)
+                    try:
+                        sync_conn.execute(text(f"ALTER TABLE {table_name} ADD COLUMN {col.name} {col_type}"))
+                    except Exception:
+                        pass
+
+
 async def init_db() -> None:
-    """Creates database tables if they do not exist."""
+    """Creates database tables if they do not exist and syncs missing columns."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await conn.run_sync(_sync_sqlite_columns)
 
 
 async def get_db() -> AsyncGenerator[AsyncSession, None]:

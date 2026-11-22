@@ -7,8 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import AyniException, ayni_exception_handler
 from app.infrastructure.database import init_db, AsyncSessionLocal
-from app.infrastructure.orm_models import ProducerORM, HarvestDeliveryORM, VaquitaPoolORM
-from app.infrastructure.repositories import ProducerRepository, DeliveryRepository, PoolRepository
+from app.infrastructure.orm_models import UserORM, ProducerORM, HarvestDeliveryORM, VaquitaPoolORM
+from app.infrastructure.repositories import UserRepository, ProducerRepository, DeliveryRepository, PoolRepository
 from app.api.v1 import api_router
 from app.api.v1.dependencies import get_risk_engine
 
@@ -17,8 +17,9 @@ logger = logging.getLogger("ayni_cacao")
 
 
 async def seed_initial_data() -> None:
-    """Seeds the database with Alto Beni producers, historical deliveries, and Vaquita pool liquidity."""
+    """Seeds the database with Alto Beni producers, users, historical deliveries, and Vaquita pool liquidity."""
     async with AsyncSessionLocal() as session:
+        user_repo = UserRepository(session)
         producer_repo = ProducerRepository(session)
         delivery_repo = DeliveryRepository(session)
         pool_repo = PoolRepository(session)
@@ -29,6 +30,43 @@ async def seed_initial_data() -> None:
             settings.VAQUITA_POOL_INITIAL_LIQUIDITY_USDC,
         )
 
+        # 2. Seed Default Demo Users if needed
+        import hashlib
+        def _hash_pw(pw: str) -> str:
+            return hashlib.sha256(f"AYNI_SALT_{pw}".encode("utf-8")).hexdigest()
+
+        mateo_user = await user_repo.get_by_email("mateo@aynicacao.bo")
+        mateo_user_id = None
+        if not mateo_user:
+            logger.info("Seeding demo users (acopiador, mateo, inversor)...")
+            user_acopiador = UserORM(
+                email="acopiador@aynicacao.bo",
+                hashed_password=_hash_pw("123456"),
+                full_name="Técnico Cooperativa El Ceibo",
+                role="ACOPIADOR",
+                pollar_wallet_address="GBCEIBO77XYZACCOPIOSTELLARALTOBENI99999999",
+            )
+            user_mateo = UserORM(
+                email="mateo@aynicacao.bo",
+                hashed_password=_hash_pw("123456"),
+                full_name="Mateo Mamani Ticona",
+                role="PRODUCTOR",
+                pollar_wallet_address="GDPOLLAR377MATEOMAMANIALTOBENISTELLAR7777",
+            )
+            user_inversor = UserORM(
+                email="inversor@aynicacao.bo",
+                hashed_password=_hash_pw("123456"),
+                full_name="Inversor Vaquita Pool",
+                role="LIQUIDEZ",
+                pollar_wallet_address="GCVAQUITA99POOLUSDCSTELLARINVESTOR11111111",
+            )
+            session.add_all([user_acopiador, user_mateo, user_inversor])
+            await session.commit()
+            await session.refresh(user_mateo)
+            mateo_user_id = user_mateo.id
+        else:
+            mateo_user_id = mateo_user.id
+
         # Check if producers already exist
         producer_count = await producer_repo.count()
         if producer_count > 0:
@@ -37,38 +75,51 @@ async def seed_initial_data() -> None:
 
         logger.info("Seeding Alto Beni & Palos Blancos cooperative producers and historical receipts...")
 
-        # 2. Seed 3 Producers
+        # 3. Seed 3 Producers
         producers = [
             ProducerORM(
+                user_id=mateo_user_id,
                 name="Mateo Mamani Ticona",
+                ci_number="6543210-LP",
                 community="Sapecho (Alto Beni)",
                 cooperative="Central de Cooperativas El Ceibo",
                 eudr_latitude=-15.5412,
                 eudr_longitude=-67.3298,
                 eudr_plot_code="BO-LPZ-AB-ELCEIBO-001",
+                parcel_hectares=4.5,
+                eudr_certified=True,
                 phone="+59171234567",
+                bank_account_hint="1000002938491 (Banco Unión - QR Simple)",
                 compliance_score=0.96,
                 risk_tier="BAJO",
             ),
             ProducerORM(
                 name="Elena Quispe Condori",
+                ci_number="7890123-LP",
                 community="Palos Blancos",
                 cooperative="Cooperativa Agroecológica Palos Blancos",
                 eudr_latitude=-15.5834,
                 eudr_longitude=-67.2489,
                 eudr_plot_code="BO-LPZ-PB-AGROECO-002",
+                parcel_hectares=3.2,
+                eudr_certified=True,
                 phone="+59172345678",
+                bank_account_hint="2000008891234 (Banco Bisa - QR Simple)",
                 compliance_score=0.78,
                 risk_tier="MEDIO",
             ),
             ProducerORM(
                 name="Carlos Condori Mamani",
+                ci_number="8901234-LP",
                 community="Bella Vista",
                 cooperative="Asociación de Productores de Cacao Alto Beni",
                 eudr_latitude=-15.6201,
                 eudr_longitude=-67.3105,
                 eudr_plot_code="BO-LPZ-BV-ASOPROC-003",
+                parcel_hectares=2.0,
+                eudr_certified=False,
                 phone="+59173456789",
+                bank_account_hint="3000004567890 (Banco Mercantil - QR Simple)",
                 compliance_score=0.55,
                 risk_tier="ALTO",
             ),
