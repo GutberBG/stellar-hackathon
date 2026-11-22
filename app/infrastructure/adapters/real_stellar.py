@@ -5,6 +5,7 @@ import time
 from typing import Any, Dict
 
 from stellar_sdk import Asset, Keypair, Network, Server, TransactionBuilder
+from stellar_sdk.exceptions import NotFoundError
 
 from app.core.config import settings
 from app.domain.ports.stellar_port import StellarPort
@@ -89,7 +90,7 @@ class RealStellarAdapter(StellarPort):
         amount_usdc: float,
         memo: str,
     ) -> Dict[str, Any]:
-        """Submits a Stellar payment operation (falls back to XLM/self if mock dest)."""
+        """Submits a Stellar payment (or create_account if destination is unfunded) on Testnet."""
         source_account = self.server.load_account(self.keypair.public_key)
         base_fee = self.server.fetch_base_fee()
 
@@ -99,27 +100,43 @@ class RealStellarAdapter(StellarPort):
         except Exception:
             dest = self.keypair.public_key
 
-        tx = (
+        dest_exists = True
+        try:
+            self.server.load_account(dest)
+        except NotFoundError:
+            dest_exists = False
+
+        send_amount = max(amount_usdc, 2.0) if not dest_exists else max(amount_usdc, 0.1)
+
+        builder = (
             TransactionBuilder(
                 source_account=source_account,
                 network_passphrase=self.network_passphrase,
                 base_fee=base_fee,
             )
             .add_text_memo(memo[:28])
-            .append_payment_op(
+        )
+
+        if dest_exists:
+            builder.append_payment_op(
                 destination=dest,
-                amount=f"{amount_usdc:.7f}",
+                amount=f"{send_amount:.7f}",
                 asset=Asset.native(),
             )
-            .set_timeout(30)
-            .build()
-        )
+        else:
+            builder.append_create_account_op(
+                destination=dest,
+                starting_balance=f"{send_amount:.7f}",
+            )
+
+        tx = builder.set_timeout(30).build()
         tx.sign(self.keypair)
         response = self.server.submit_transaction(tx)
+        logger.info("Sent %s XLM on Stellar Testnet to %s: tx=%s", send_amount, dest, response["hash"])
         return {
             "status": "SUCCESS",
             "tx_hash": response["hash"],
-            "amount_usdc": amount_usdc,
+            "amount_usdc": send_amount,
             "destination": dest,
             "asset": "XLM_TESTNET",
             "memo": memo,

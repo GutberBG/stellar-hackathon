@@ -204,6 +204,10 @@ class FactoringExecuteRequest(BaseModel):
     expected_harvest_kg: float = Field(..., gt=0, description="Cosecha comprometida (kg)")
     rainfall_mm: float = Field(default=160.0, ge=0)
     humidity_pct: float = Field(default=78.0, ge=0, le=100)
+    pollar_wallet_address: Optional[str] = Field(
+        default=None,
+        description="Dirección Stellar Testnet de la wallet Pollar para simular transferencia",
+    )
 
 
 class FactoringExecuteResponse(BaseModel):
@@ -222,6 +226,7 @@ class FactoringExecuteResponse(BaseModel):
     pollar_payout_id: str
     pollar_qr_payload: str
     qr_deep_link: str
+    stellar_tx_hash: Optional[str] = None
     created_at: datetime
 
 
