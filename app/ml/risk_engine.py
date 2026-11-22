@@ -41,6 +41,13 @@ class RiskEngine:
         
     def _load_model(self):
         """Loads cached two-stage model."""
+        import sys
+        import app.ml
+        import app.ml.model_classes
+        import app.ml.model_pickle_compat
+        sys.modules['ml'] = app.ml
+        sys.modules['ml.model_classes'] = app.ml.model_classes
+        sys.modules['ml.model_pickle_compat'] = app.ml.model_pickle_compat
         if os.path.exists(self.model_path):
             try:
                 model = joblib.load(self.model_path)

@@ -2,7 +2,8 @@
 import logging
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.core.exceptions import AyniException, ayni_exception_handler
@@ -11,6 +12,7 @@ from app.infrastructure.orm_models import UserORM, ProducerORM, HarvestDeliveryO
 from app.infrastructure.repositories import UserRepository, ProducerRepository, DeliveryRepository, PoolRepository
 from app.api.v1 import api_router
 from app.api.v1.dependencies import get_risk_engine
+from app.ui.dashboard_html import DASHBOARD_HTML
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("ayni_cacao")
@@ -288,13 +290,42 @@ app.include_router(api_router)
 
 
 @app.get("/", tags=["Health"])
-async def root():
+async def root(request: Request):
+    accept = request.headers.get("accept", "")
+    # If requested by a web browser, serve the interactive UI
+    if "text/html" in accept and not accept.startswith("application/json") and accept != "*/*":
+        return HTMLResponse(content=DASHBOARD_HTML)
     return {
         "service": settings.APP_NAME,
         "version": settings.APP_VERSION,
         "environment": settings.APP_ENV,
         "status": "ONLINE",
         "docs": "/docs",
+        "app_ui": "/app",
+    }
+
+
+@app.get("/app", response_class=HTMLResponse, tags=["UI"])
+async def web_application():
+    """Serves the interactive web UI dashboard for smallholders, cooperatives and factoring."""
+    return HTMLResponse(content=DASHBOARD_HTML)
+
+
+@app.get("/api/v1", tags=["Health"])
+async def api_v1_index():
+    return {
+        "status": "ONLINE",
+        "version": "v1",
+        "endpoints": [
+            "/api/v1/producers",
+            "/api/v1/deliveries",
+            "/api/v1/factoring/simulate",
+            "/api/v1/factoring/execute",
+            "/api/v1/dashboard",
+            "/api/v1/auth/login",
+        ],
+        "docs": "/docs",
+        "app": "/app",
     }
 
 

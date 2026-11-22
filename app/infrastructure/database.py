@@ -39,7 +39,6 @@ def _sync_sqlite_columns(sync_conn) -> None:
 
 
 async def init_db() -> None:
-async def init_db() -> None:
     """Creates database tables if they do not exist and syncs missing columns."""
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)

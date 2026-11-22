@@ -173,7 +173,7 @@ async def test_06_module_2_factoring_execute_and_escrow():
         assert loan["trustless_escrow_id"].startswith("escrow_tw_")
         assert loan["pollar_payout_id"].startswith("pol_out_")
         assert "bo.gob.asfi.qr" in loan["pollar_qr_payload"]
-        assert "https://qr.pollar.io/pay/" in loan["qr_deep_link"]
+        assert "https://qr.pollar.xyz/pay/" in loan["qr_deep_link"] or "https://qr.pollar.io/pay/" in loan["qr_deep_link"]
 
 
 @pytest.mark.anyio

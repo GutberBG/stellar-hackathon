@@ -24,13 +24,14 @@ def get_two_stage_model():
     """Load the Two-Stage model from disk."""
     global _model_cache
     if _model_cache is None:
-        model_path = "/home/patito/Desktop/stella/stellar-hackathon/app/ml/best_two_stage_model.pkl"
-        if not os.path.exists(model_path):
+        from app.api.v1.dependencies import get_risk_engine
+        engine = get_risk_engine()
+        if engine.model is None:
             raise HTTPException(
                 status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
                 detail="Model not trained yet. Please train the model first."
             )
-        _model_cache = joblib.load(model_path)
+        _model_cache = engine.model
     return _model_cache
 
 
